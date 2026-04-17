@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NYGH Cardiology Portal 2026</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:#f4f6fb;color:#1e293b;font-size:13px;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font-family:inherit}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:4px}
+#hdr{background:white;border-bottom:3px solid #2563eb;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 6px rgba(0,0,0,0.07);flex-shrink:0}
+#nav{background:white;border-bottom:1px solid #e2e8f0;display:none;overflow-x:auto;flex-shrink:0}
+.tb{border:none;background:none;padding:10px 12px;font-size:11px;font-weight:700;color:#64748b;cursor:pointer;border-bottom:2.5px solid transparent;white-space:nowrap}
+.tb.on{color:#2563eb;border-bottom-color:#2563eb}
+#main{padding:12px;overflow-y:auto;flex:1}
+#app{display:flex;flex-direction:column;height:100vh}
+.card{background:white;border-radius:10px;border:1px solid #e2e8f0;padding:12px 14px;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.dh{text-align:center;font-size:9px;font-weight:800;color:#94a3b8;padding:3px 0}
+.cell{border-radius:6px;border:1.5px solid #e2e8f0;background:white;overflow:hidden;padding:3px 2px}
+.cell.wk{background:#f9fafb;border-color:#e5e7eb}
+.cell.me{border-color:#f59e0b;box-shadow:0 0 0 2px #fbbf24}
+.cell.td2{background:#eff6ff;border-color:#3b82f6}
+.cell.st{background:#fff5f5;border-color:#fca5a5}
+.pill{display:flex;align-items:center;gap:2px;padding:1px 2px;border-radius:3px;margin-bottom:1px;cursor:default}
+.pill.mine{border:1.5px solid #f59e0b;cursor:pointer}
+.pill.em{opacity:0.25}
+.pl{font-size:6px;font-weight:800;min-width:8px;flex-shrink:0}
+.pn{font-size:6.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;color:#374151}
+.pill.mine .pn,.pill.mine .pl{color:white}
+.btn{border:none;padding:11px 0;border-radius:9px;font-size:13px;font-weight:800;cursor:pointer;width:100%;margin-top:8px}
+.btn-blue{background:#2563eb;color:white}
+.btn-teal{background:#0d9488;color:white}
+.btn-purple{background:#6d28d9;color:white}
+.btn-amber{background:#f59e0b;color:white}
+.btn-gray{background:#e2e8f0;color:#94a3b8;cursor:default}
+.btn-green{background:#15803d;color:white}
+.inp{width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:12px;color:#1e293b;background:white;font-family:inherit;box-sizing:border-box}
+.mdbg{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:flex-end;justify-content:center;z-index:99}
+.mdbx{background:white;border-radius:16px 16px 0 0;width:100%;max-width:480px;padding:20px;max-height:88vh;overflow-y:auto}
+.toast{position:fixed;top:10px;left:50%;transform:translateX(-50%);background:#0d9488;color:white;padding:9px 18px;border-radius:10px;z-index:999;font-size:12px;font-weight:700;pointer-events:none;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,0.25)}
+table{width:100%;border-collapse:collapse;font-size:10px}
+th{padding:6px 4px;font-size:8px;font-weight:800;color:#64748b;background:#f8fafc;text-align:center;text-transform:uppercase;letter-spacing:0.5px}
+td{padding:6px 4px;text-align:center;border-bottom:1px solid #f1f5f9}
+.srow{background:white;border-radius:10px;border:1px solid #e2e8f0;padding:10px 13px;display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.sbtn{background:none;border:none;cursor:pointer;padding:4px 6px;font-size:18px;color:#94a3b8}
+.sec-btn{padding:6px 12px;font-size:10px;font-weight:700;border:none;border-radius:8px;cursor:pointer;margin:0 3px 3px 0}
+.sec-btn.on{background:#1e40af;color:white}
+.sec-btn.off{background:#f1f5f9;color:#64748b}
+.banner{border-radius:11px;padding:12px 14px;margin-bottom:12px}
+.banner.blue{background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8}
+.banner.green{background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d}
+.banner.red{background:#fef2f2;border:1px solid #fecaca;color:#dc2626}
+.banner.yellow{background:#fefce8;border:1px solid #fde047;color:#854d0e}
+.log-box{background:#0f172a;border-radius:9px;padding:10px 12px;font-family:monospace;font-size:10px;color:#94a3b8;line-height:1.9;margin-top:8px}
+.chip{padding:2px 9px;border-radius:20px;font-size:9px;font-weight:700;display:inline-block}
+.chip-pending{background:#fef3c7;color:#92400e}
+.chip-approved{background:#d1fae5;color:#065f46}
+.chip-declined{background:#fee2e2;color:#7f1d1d}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="hdr">
+    <div>
+      <div style="font-weight:800;font-size:14px;color:#0d1b2a">NYGH Cardiology</div>
+      <div id="subhdr" style="font-size:10px;color:#94a3b8;margin-top:1px">Jan&ndash;Jun 2026 &nbsp;<span id="storeMode" style="font-size:9px;opacity:0.7"></span></div>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center">
+      <button id="icsBtn" style="display:none;background:#6d28d9;border:none;color:white;font-size:10px;font-weight:700;border-radius:6px;padding:5px 9px;cursor:pointer">&#11015; ICS</button>
+      <button id="signout" style="display:none;background:#f1f5f9;border:1px solid #e2e8f0;color:#64748b;font-size:10px;border-radius:6px;padding:5px 9px;cursor:pointer">Sign out</button>
+    </div>
+  </div>
+  <div id="nav">
+    <button class="tb on" data-tab="cal">&#128197; Calendar</button>
+    <button class="tb" data-tab="mine">&#128100; My Shifts</button>
+    <button class="tb" data-tab="vac">&#127796; Vacation</button>
+    <button class="tb" data-tab="swaps">&#8644; Swaps</button>
+    <button class="tb" data-tab="counts">&#128202; Counts</button>
+    <button class="tb" id="adminTab" data-tab="admin" style="display:none">&#9881; Admin</button>
+  </div>
+  <div id="main"></div>
+</div>
+
+<script>
+// ── SCHEDULE DATA ─────────────────────────────────────────────────────────────
+var S={"2026-01-05":{"call1":"Cheng","call2":"Hammer","CC":["Rose"],"NI":"Huang","EP":"Bajaj"},"2026-01-06":{"call1":"Hammer","call2":"Cheng","CC":["Morant"],"NI":"Bajaj","TEE":"Hammer"},"2026-01-07":{"call1":"Cheng","call2":"Hammer","CC":["Lubelsky"],"NI":"Morant","EP":"Kagal"},"2026-01-08":{"call1":"Hammer","call2":"Cheng","CC":["Huang"],"NI":"Rose"},"2026-01-09":{"call1":"Cheng","call2":"Hammer","CC":["Lalonde"],"NI":"Huang","EP":"Bajaj"},"2026-01-10":{"call1":"Hammer"},"2026-01-11":{"call1":"Hammer"},"2026-01-12":{"call1":"Siu","call2":"Lalonde","CC":["Hammer"],"NI":"Morant","EP":"Kagal"},"2026-01-13":{"call1":"Lalonde","call2":"Siu","CC":["Lubelsky"],"NI":"Hammer","TEE":"Lalonde"},"2026-01-14":{"call1":"Siu","call2":"Lalonde","CC":["Cheng"],"NI":"Morant","EP":"Bajaj"},"2026-01-15":{"call1":"Lalonde","call2":"Siu","CC":["Rose"],"NI":"Cheng"},"2026-01-16":{"call1":"Siu","call2":"Lalonde","CC":["Kagal"],"NI":"Hammer","EP":"Kagal"},"2026-01-17":{"call1":"Lalonde"},"2026-01-18":{"call1":"Lalonde"},"2026-01-19":{"call1":"Morant","call2":"Huang","CC":["Myron"],"NI":"Lalonde","EP":"Bajaj"},"2026-01-20":{"call1":"Huang","call2":"Morant","CC":["Bajaj"],"NI":"Myron","TEE":"Morant"},"2026-01-21":{"call1":"Morant","call2":"Huang","CC":["Hammer"],"NI":"Kagal","EP":"Bajaj"},"2026-01-22":{"call1":"Huang","call2":"Morant","CC":["Siu"],"NI":"Bajaj"},"2026-01-23":{"call1":"Morant","call2":"Huang","CC":["Lalonde"],"NI":"Siu","EP":"Bajaj"},"2026-01-24":{"call1":"Huang"},"2026-01-25":{"call1":"Huang"},"2026-01-26":{"call1":"Cheng","call2":"Rose","CC":["Morant"],"NI":"Huang","EP":"Kagal"},"2026-01-27":{"call1":"Rose","call2":"Cheng","CC":["Huang"],"NI":"Morant","TEE":"Cheng"},"2026-01-28":{"call1":"Cheng","call2":"Rose","CC":["Kagal"],"NI":"Lalonde","EP":"Bajaj"},"2026-01-29":{"call1":"Rose","call2":"Cheng","CC":["Myron"],"NI":"Morant"},"2026-01-30":{"call1":"Cheng","call2":"Rose","CC":["Cai"],"NI":"Myron","EP":"Bajaj"},"2026-01-31":{"call1":"Rose"},"2026-02-01":{"call1":"Rose"},"2026-02-02":{"call1":"Cai","call2":"Myron","CC":["Cheng"],"NI":"Siu","EP":"Kagal"},"2026-02-03":{"call1":"Myron","call2":"Cai","CC":["Rose"],"NI":"Cheng","TEE":"Cai"},"2026-02-04":{"call1":"Cai","call2":"Myron","CC":["Bajaj"],"NI":"Morant","EP":"Kagal"},"2026-02-05":{"call1":"Myron","call2":"Cai","CC":["Morant"],"NI":"Kagal"},"2026-02-06":{"call1":"Cai","call2":"Myron","CC":["Lalonde"],"NI":"Siu","EP":"Bajaj"},"2026-02-07":{"call1":"Myron"},"2026-02-08":{"call1":"Myron"},"2026-02-09":{"call1":"Siu","call2":"Bajaj","CC":["Hammer"],"NI":"Cai","EP":"Bajaj"},"2026-02-10":{"call1":"Bajaj","call2":"Siu","CC":["Cai"],"NI":"Hammer","TEE":"Hammer"},"2026-02-11":{"call1":"Siu","call2":"Bajaj","CC":["Cheng"],"NI":"Rose","EP":"Bajaj"},"2026-02-12":{"call1":"Bajaj","call2":"Siu","CC":["Rose"],"NI":"Cheng"},"2026-02-13":{"call1":"Siu","call2":"Bajaj","CC":["Myron"],"NI":"Hammer","EP":"Bajaj"},"2026-02-14":{"call1":"Bajaj"},"2026-02-15":{"call1":"Bajaj"},"2026-02-16":{"call1":"Hammer","call2":"Cai"},"2026-02-17":{"call1":"Cai","call2":"Hammer","CC":["Huang"],"NI":"Morant","TEE":"Cai"},"2026-02-18":{"call1":"Hammer","call2":"Cai","CC":["Lalonde"],"NI":"Huang","EP":"Bajaj"},"2026-02-19":{"call1":"Cai","call2":"Hammer","CC":["Bajaj"],"NI":"Lalonde"},"2026-02-20":{"call1":"Hammer","call2":"Cai","CC":["Huang"],"NI":"Myron","EP":"Bajaj"},"2026-02-21":{"call1":"Cai"},"2026-02-22":{"call1":"Cai"},"2026-02-23":{"call1":"Kagal","call2":"Teitlebaum","CC":["Morant"],"NI":"Huang","EP":"Bajaj"},"2026-02-24":{"call1":"Teitlebaum","call2":"Kagal","CC":["Hammer"],"NI":"Siu","TEE":"Huang"},"2026-02-25":{"call1":"Kagal","call2":"Teitlebaum","CC":["Siu"],"NI":"Lalonde","EP":"Kagal"},"2026-02-26":{"call1":"Teitlebaum","call2":"Kagal","CC":["Siu"],"NI":"Cai"},"2026-02-27":{"call1":"Kagal","call2":"Teitlebaum","CC":["Cai"],"NI":"Cheng","EP":"Kagal"},"2026-02-28":{"call1":"Teitlebaum"},"2026-03-01":{"call1":"Teitlebaum"},"2026-03-02":{"call1":"Siu","call2":"Huang","CC":["Kagal"],"NI":"Rose","EP":"Bajaj"},"2026-03-03":{"call1":"Huang","call2":"Siu","CC":["Rose"],"NI":"Kagal","TEE":"Huang"},"2026-03-04":{"call1":"Siu","call2":"Huang","CC":["Myron"],"NI":"Morant","EP":"Kagal"},"2026-03-05":{"call1":"Huang","call2":"Siu","CC":["Kagal"],"NI":"Bajaj"},"2026-03-06":{"call1":"Siu","call2":"Huang","CC":["Bajaj"],"NI":"Myron","EP":"Bajaj"},"2026-03-07":{"call1":"Huang"},"2026-03-08":{"call1":"Huang"},"2026-03-09":{"call1":"Lalonde","call2":"Kagal","CC":["Morant"],"NI":"Siu","EP":"Bajaj"},"2026-03-10":{"call1":"Kagal","call2":"Lalonde","CC":["Hammer"],"NI":"Bajaj","TEE":"Lalonde"},"2026-03-11":{"call1":"Lalonde","call2":"Kagal","CC":["Cheng"],"NI":"Hammer","EP":"Bajaj"},"2026-03-12":{"call1":"Kagal","call2":"Lalonde","CC":["Lubelsky"],"NI":"Myron"},"2026-03-13":{"call1":"Lalonde","call2":"Kagal","CC":["Myron"],"NI":"Cai","EP":"Kagal"},"2026-03-14":{"call1":"Kagal"},"2026-03-15":{"call1":"Kagal"},"2026-03-16":{"call1":"Hammer","call2":"Cheng","CC":["Huang"],"NI":"Lalonde","EP":"Kagal"},"2026-03-17":{"call1":"Cheng","call2":"Hammer","CC":["Lalonde"],"NI":"Siu","TEE":"Cheng"},"2026-03-18":{"call1":"Hammer","call2":"Cheng","CC":["Kagal"],"NI":"Huang","EP":"Kagal"},"2026-03-19":{"call1":"Cheng","call2":"Hammer","CC":["Huang"],"NI":"Kagal"},"2026-03-20":{"call1":"Hammer","call2":"Cheng","CC":["Lalonde"],"NI":"Siu","EP":"Bajaj"},"2026-03-21":{"call1":"Cheng"},"2026-03-22":{"call1":"Cheng"},"2026-03-23":{"call1":"Teitlebaum","call2":"Morant","CC":["Siu"],"NI":"Cheng","EP":"Bajaj"},"2026-03-24":{"call1":"Morant","call2":"Teitlebaum","CC":["Cheng"],"NI":"Bajaj","TEE":"Morant"},"2026-03-25":{"call1":"Teitlebaum","call2":"Morant","CC":["Bajaj"],"NI":"Hammer","EP":"Kagal"},"2026-03-26":{"call1":"Morant","call2":"Teitlebaum","CC":["Hammer"],"NI":"Kagal"},"2026-03-27":{"call1":"Teitlebaum","call2":"Morant","CC":["Siu"],"NI":"Lalonde","EP":"Bajaj"},"2026-03-28":{"call1":"Morant"},"2026-03-29":{"call1":"Morant"},"2026-03-30":{"call1":"Rose","call2":"Huang","CC":["Morant"],"NI":"Cai","EP":"Bajaj"},"2026-03-31":{"call1":"Huang","call2":"Rose","CC":["Cai"],"NI":"Morant","TEE":"Huang"},"2026-04-01":{"call1":"Rose","call2":"Huang","CC":["Cheng"],"NI":"Teitlebaum","EP":"Bajaj"},"2026-04-02":{"call1":"Huang","call2":"Rose","CC":["Hammer"],"NI":"Cheng"},"2026-04-03":{"call1":"Rose","call2":"Huang"},"2026-04-04":{"call1":"Huang"},"2026-04-05":{"call1":"Huang"},"2026-04-06":{"call1":"Myron","call2":"Cheng"},"2026-04-07":{"call1":"Cheng","call2":"Myron","CC":["Rose"],"NI":"Bajaj","TEE":"Cheng"},"2026-04-08":{"call1":"Myron","call2":"Cheng","CC":["Rose"],"NI":"Morant","EP":"Bajaj"},"2026-04-09":{"call1":"Cheng","call2":"Myron","CC":["Teitlebaum"],"NI":"Rose"},"2026-04-10":{"call1":"Myron","call2":"Cheng","CC":["Morant"],"NI":"Rose","EP":"Bajaj"},"2026-04-11":{"call1":"Cheng"},"2026-04-12":{"call1":"Cheng"},"2026-04-13":{"call1":"Morant","call2":"Cai","CC":["Myron"],"NI":"Huang","EP":"Bajaj"},"2026-04-14":{"call1":"Cai","call2":"Morant","CC":["Kagal"],"NI":"Myron","TEE":"Morant"},"2026-04-15":{"call1":"Morant","call2":"Cai","CC":["Bajaj"],"NI":"Hammer","EP":"Kagal"},"2026-04-16":{"call1":"Cai","call2":"Morant","CC":["Huang"],"NI":"Kagal"},"2026-04-17":{"call1":"Morant","call2":"Cai","CC":["Cheng"],"NI":"Huang","EP":"Bajaj"},"2026-04-18":{"call1":"Cai"},"2026-04-19":{"call1":"Cai"},"2026-04-20":{"call1":"Lalonde","call2":"Myron","CC":["Lubelsky"],"NI":"Siu","EP":"Bajaj"},"2026-04-21":{"call1":"Myron","call2":"Lalonde","CC":["Kagal"],"NI":"Cai","TEE":"Lalonde"},"2026-04-22":{"call1":"Lalonde","call2":"Myron","CC":["Rose"],"NI":"Cheng","EP":"Bajaj"},"2026-04-23":{"call1":"Myron","call2":"Lalonde","CC":["Cai"],"NI":"Rose"},"2026-04-24":{"call1":"Lalonde","call2":"Myron","CC":["Teitlebaum"],"NI":"Kagal","EP":"Bajaj"},"2026-04-25":{"call1":"Myron"},"2026-04-26":{"call1":"Myron"},"2026-04-27":{"call1":"Bajaj","call2":"Hammer","CC":["Lalonde"],"NI":"Myron","EP":"Bajaj"},"2026-04-28":{"call1":"Hammer","call2":"Bajaj","CC":["Myron"],"NI":"Lalonde","TEE":"Hammer"},"2026-04-29":{"call1":"Bajaj","call2":"Hammer","CC":["Morant"],"NI":"Teitlebaum","EP":"Bajaj"},"2026-04-30":{"call1":"Hammer","call2":"Bajaj","CC":["Siu"],"NI":"Morant"},"2026-05-01":{"call1":"Bajaj","call2":"Hammer","CC":["Huang"],"NI":"Siu","EP":"Bajaj"},"2026-05-02":{"call1":"Hammer"},"2026-05-03":{"call1":"Hammer"},"2026-05-04":{"call1":"Rose","call2":"Morant","CC":["Myron"],"NI":"Hammer","EP":"Bajaj"},"2026-05-05":{"call1":"Morant","call2":"Rose","CC":["Hammer"],"NI":"Bajaj","TEE":"Morant"},"2026-05-06":{"call1":"Rose","call2":"Morant","CC":["Hammer"],"NI":"Huang","EP":"Bajaj"},"2026-05-07":{"call1":"Morant","call2":"Rose","CC":["Cheng"],"NI":"Lalonde"},"2026-05-08":{"call1":"Rose","call2":"Morant","CC":["Myron"],"NI":"Cheng","EP":"Bajaj"},"2026-05-09":{"call1":"Morant"},"2026-05-10":{"call1":"Morant"},"2026-05-11":{"call1":"Kagal","call2":"Siu","CC":["Rose"],"NI":"Myron","EP":"Bajaj"},"2026-05-12":{"call1":"Siu","call2":"Kagal","CC":["Bajaj"],"NI":"Rose","TEE":"Hammer"},"2026-05-13":{"call1":"Kagal","call2":"Siu","CC":["Morant"],"NI":"Bajaj","EP":"Kagal"},"2026-05-14":{"call1":"Siu","call2":"Kagal","CC":["Hammer"],"NI":"Morant"},"2026-05-15":{"call1":"Kagal","call2":"Siu","CC":["Huang"],"NI":"Hammer","EP":"Kagal"},"2026-05-16":{"call1":"Siu"},"2026-05-17":{"call1":"Siu"},"2026-05-18":{"call1":"Lalonde","call2":"Rose"},"2026-05-19":{"call1":"Rose","call2":"Lalonde","CC":["Cai"],"NI":"Kagal","TEE":"Lalonde"},"2026-05-20":{"call1":"Lalonde","call2":"Rose","CC":["Kagal"],"NI":"Cai","EP":"Bajaj"},"2026-05-21":{"call1":"Rose","call2":"Lalonde","CC":["Siu"],"NI":"Cai"},"2026-05-22":{"call1":"Lalonde","call2":"Rose","CC":["Cai"],"NI":"Siu","EP":"Bajaj"},"2026-05-23":{"call1":"Rose"},"2026-05-24":{"call1":"Rose"},"2026-05-25":{"call1":"Morant","call2":"Kagal","CC":["Rose"],"NI":"Myron","EP":"Bajaj"},"2026-05-26":{"call1":"Kagal","call2":"Morant","CC":["Myron"],"NI":"Rose","TEE":"Morant"},"2026-05-27":{"call1":"Morant","call2":"Kagal","CC":["Cheng"],"NI":"Cai","EP":"Kagal"},"2026-05-28":{"call1":"Kagal","call2":"Morant","CC":["Cai"],"NI":"Cheng"},"2026-05-29":{"call1":"Morant","call2":"Kagal","CC":["Siu"],"NI":"Teitlebaum","EP":"Kagal"},"2026-05-30":{"call1":"Kagal"},"2026-05-31":{"call1":"Kagal"},"2026-06-01":{"call1":"Bajaj","call2":"Lalonde","CC":["Teitlebaum"],"NI":"Huang","EP":"Bajaj"},"2026-06-02":{"call1":"Lalonde","call2":"Bajaj","CC":["Kagal"],"NI":"Teitlebaum","TEE":"Lalonde"},"2026-06-03":{"call1":"Bajaj","call2":"Lalonde","CC":["Teitlebaum"],"NI":"Morant","EP":"Kagal"},"2026-06-04":{"call1":"Lalonde","call2":"Bajaj","CC":["Morant"],"NI":"Kagal"},"2026-06-05":{"call1":"Bajaj","call2":"Lalonde","CC":["Huang"],"NI":"Cai","EP":"Bajaj"},"2026-06-06":{"call1":"Lalonde"},"2026-06-07":{"call1":"Lalonde"},"2026-06-08":{"call1":"Huang","call2":"Myron","CC":["Lalonde"],"NI":"Siu","EP":"Bajaj"},"2026-06-09":{"call1":"Myron","call2":"Huang","CC":["Bajaj"],"NI":"Lalonde","TEE":"Huang"},"2026-06-10":{"call1":"Huang","call2":"Myron","CC":["Lalonde"],"NI":"Cheng","EP":"Bajaj"},"2026-06-11":{"call1":"Myron","call2":"Huang","CC":["Cai"],"NI":"Bajaj"},"2026-06-12":{"call1":"Huang","call2":"Myron","CC":["Cheng"],"NI":"Lalonde","EP":"Bajaj"},"2026-06-13":{"call1":"Myron"},"2026-06-14":{"call1":"Myron"},"2026-06-15":{"call1":"Cai","call2":"Bajaj","CC":["Rose"],"NI":"Huang","EP":"Bajaj"},"2026-06-16":{"call1":"Bajaj","call2":"Cai","CC":["Myron"],"NI":"Rose","TEE":"Cai"},"2026-06-17":{"call1":"Cai","call2":"Bajaj","CC":["Teitlebaum"],"NI":"Myron","EP":"Bajaj"},"2026-06-18":{"call1":"Bajaj","call2":"Cai","CC":["Morant"],"NI":"Teitlebaum"},"2026-06-19":{"call1":"Cai","call2":"Bajaj","CC":["Siu"],"NI":"Morant","EP":"Bajaj"},"2026-06-20":{"call1":"Bajaj"},"2026-06-21":{"call1":"Bajaj"},"2026-06-22":{"call1":"Huang","call2":"Siu","CC":["Kagal"],"NI":"Cai","EP":"Bajaj"},"2026-06-23":{"call1":"Siu","call2":"Huang","CC":["Bajaj"],"NI":"Kagal","TEE":"Huang"},"2026-06-24":{"call1":"Huang","call2":"Siu","CC":["Kagal"],"NI":"Myron","EP":"Bajaj"},"2026-06-25":{"call1":"Siu","call2":"Huang","CC":["Myron"],"NI":"Bajaj"},"2026-06-26":{"call1":"Huang","call2":"Siu","CC":["Cai"],"NI":"Kagal","EP":"Bajaj"},"2026-06-27":{"call1":"Siu"},"2026-06-28":{"call1":"Siu"},"2026-06-29":{"call1":"Cheng","call2":"Hammer","CC":["Huang"],"NI":"Lalonde","EP":"Kagal"},"2026-06-30":{"call1":"Hammer","call2":"Cheng","CC":["Lalonde"],"NI":"Huang","TEE":"Cheng"}};
+
+// ── SCHEDULE INTEGRITY VERIFICATION ──────────────────────────────────────────
+// Expected call totals derived from NYGH_Schedule_2026_FINAL_9.html
+// Range: 24-31 (FT), avg 26.5. DO NOT modify S without re-running verify.
+var EXPECTED_CALL = {"Bajaj":24,"Morant":29,"Hammer":26,"Siu":29,"Huang":31,"Lalonde":29,"Cai":24,"Cheng":26,"Rose":24,"Myron":26,"Kagal":24,"Teitlebaum":12};
+// TEE weeks verified from original HTML (NYGH_Schedule_2026_FINAL_9.html screenshot)
+var TEE_WKS = {"Morant":10,"Hammer":8,"Huang":9,"Lalonde":10,"Cai":6,"Cheng":8};
+// CC/NI/EP verified from same screenshot
+var EXPECTED_CC  = {"Bajaj":9,"Morant":11,"Hammer":10,"Siu":9,"Huang":11,"Lalonde":10,"Cai":10,"Cheng":10,"Rose":11,"Myron":12,"Kagal":11,"Teitlebaum":5,"Lubelsky":4};
+var EXPECTED_NI  = {"Bajaj":10,"Morant":14,"Hammer":9,"Siu":11,"Huang":12,"Lalonde":11,"Cai":10,"Cheng":10,"Rose":9,"Myron":11,"Kagal":11,"Teitlebaum":5};
+var EXPECTED_EP  = {"Bajaj":52,"Kagal":20};
+function verifySchedule(sched) {
+  var ok = true; var errors = [];
+  // Verify call counts
+  Object.entries(EXPECTED_CALL).forEach(function(e) {
+    var name=e[0],exp=e[1],fc=0,sc=0;
+    Object.values(sched).forEach(function(day){if(day.call1===name)fc++;if(day.call2===name)sc++;});
+    var got=fc+sc;if(got!==exp){ok=false;errors.push(name+' Call: exp '+exp+' got '+got);}
+  });
+  // Verify CC counts
+  Object.entries(EXPECTED_CC).forEach(function(e) {
+    var name=e[0],exp=e[1],got=0;
+    Object.values(sched).forEach(function(day){if(day.CC&&day.CC.includes(name))got++;});
+    if(got!==exp){ok=false;errors.push(name+' CC: exp '+exp+' got '+got);}
+  });
+  // Verify EP counts
+  Object.entries(EXPECTED_EP).forEach(function(e) {
+    var name=e[0],exp=e[1],got=0;
+    Object.values(sched).forEach(function(day){if(day.EP===name)got++;});
+    if(got!==exp){ok=false;errors.push(name+' EP: exp '+exp+' got '+got);}
+  });
+  // NI spot checks (Bajaj and Siu are the sensitive ones)
+  var bajajNI=0,siuNI=0;
+  Object.values(sched).forEach(function(day){if(day.NI==='Bajaj')bajajNI++;if(day.NI==='Siu')siuNI++;});
+  if(bajajNI!==EXPECTED_NI['Bajaj']){ok=false;errors.push('Bajaj NI: exp '+EXPECTED_NI['Bajaj']+' got '+bajajNI);}
+  if(siuNI!==EXPECTED_NI['Siu']){ok=false;errors.push('Siu NI: exp '+EXPECTED_NI['Siu']+' got '+siuNI);}
+  return {ok: ok, errors: errors};
+}
+// Run verification on load — alert admin if mismatch
+(function() {
+  var result = verifySchedule(S);
+  if(!result.ok) {
+    console.error('SCHEDULE INTEGRITY ERROR:', result.errors);
+  }
+})();
+
+
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+var ADMIN_EMAIL="ravi.bajaj@nygh.on.ca";
+var DOMAIN="nygh.on.ca";
+var EM={"ravi.bajaj@nygh.on.ca":"Bajaj","kareem.morant@nygh.on.ca":"Morant","michael.hammer@nygh.on.ca":"Hammer","vincent.siu@nygh.on.ca":"Siu","flora.huang@nygh.on.ca":"Huang","spencer.lalonde@nygh.on.ca":"Lalonde","sean.cai@nygh.on.ca":"Cai","anthony.cheng@nygh.on.ca":"Cheng","randi.rose@nygh.on.ca":"Rose","phil.myron@nygh.on.ca":"Myron","darren.kagal@nygh.on.ca":"Kagal","earl.teitlebaum@nygh.on.ca":"Teitlebaum","lubelsky@nygh.on.ca":"Lubelsky"};
+var STATS={"2026-02-16":"Family Day","2026-04-03":"Good Friday","2026-04-06":"Easter Monday","2026-05-18":"Victoria Day"};
+var RC={call1:{s:"FC",c:"#1e3a8a",l:"1st Call"},call2:{s:"SC",c:"#2563eb",l:"2nd Call"},CC:{s:"CC",c:"#0d9488",l:"Clinic"},NI:{s:"NI",c:"#b45309",l:"Non-Inv"},EP:{s:"EP",c:"#6d28d9",l:"EP Lab"},TEE:{s:"TEE",c:"#9f1239",l:"TEE"}};
+var MN=["January","February","March","April","May","June"];
+var DT={Bajaj:"FT",Morant:"FT",Hammer:"FT",Siu:"FT",Huang:"FT",Lalonde:"FT",Cai:"FT",Cheng:"FT",Rose:"FT",Myron:"FT",Kagal:"FT",Teitlebaum:"PT",Lubelsky:"CC"};
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+var user=null,isAdmin=false,month=Math.max(0,Math.min(5,new Date().getMonth())),curTab="cal";
+var swaps=[],vacs=[],archivedCounts={},_countMode="current"; // archivedCounts: cumulative from previous periods
+var cfg={vacWindowOpen:"2026-04-01",vacWindowClose:"2026-04-30",schedulePeriodLabel:"Jul-Dec 2026",scheduleStart:"2026-07-01",scheduleEnd:"2026-12-31",maxVacDays:50,proxyUrl:"https://nygh-proxy-4w5v.vercel.app/api/proxy"};
+var swapM=null,vacM=false,adminSec="window";
+var genLog=[],genStatus="idle",genPreview=null;
+
+// ── STORAGE — remote KV when proxyUrl set, localStorage fallback ──────────────
+function storeUrl(){return cfg.proxyUrl?cfg.proxyUrl.replace(/\/api\/proxy$/,'')+'/api/store':null;}
+async function remoteGet(key){
+  var url=storeUrl();if(!url)return null;
+  try{var r=await fetch(url+'?key='+encodeURIComponent(key));var d=await r.json();return d.value||null;}catch(e){return null;}
+}
+async function remoteSet(key,val){
+  var url=storeUrl();if(!url)return;
+  try{await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:key,value:val})});}catch(e){}
+}
+function lsGet(key,def){try{var v=localStorage.getItem("nygh_"+key);return v?JSON.parse(v):def;}catch(e){return def;}}
+function lsSet(key,val){try{localStorage.setItem("nygh_"+key,JSON.stringify(val));}catch(e){}}
+async function loadAll(){
+  var remote=!!storeUrl();
+  var sm=document.getElementById('storeMode');
+  if(remote){
+    if(sm)sm.textContent='☁ Shared';
+    var keys=['swaps','vacs','cfg','archivedCounts','sched'];
+    var res=await Promise.all(keys.map(function(k){return remoteGet(k);}));
+    swaps=res[0]||[];vacs=res[1]||[];
+    var c=res[2];if(c){var savedProxy=cfg.proxyUrl;cfg=Object.assign({},cfg,c);cfg.proxyUrl=savedProxy;}
+    archivedCounts=res[3]||{};
+    var s=res[4];if(s&&Object.keys(s).length>50)S=s;
+  } else {
+    if(sm)sm.textContent='⚠ Local only';
+    swaps=lsGet('swaps',[]);vacs=lsGet('vacs',[]);
+    var c=lsGet('cfg',null);if(c){var savedProxy=cfg.proxyUrl;cfg=Object.assign({},cfg,c);cfg.proxyUrl=savedProxy;}
+    archivedCounts=lsGet('archivedCounts',{});
+    var s=lsGet('sched',null);if(s&&Object.keys(s).length>50)S=s;
+  }
+}
+async function saveSwaps(){if(storeUrl())await remoteSet('swaps',swaps);lsSet('swaps',swaps);}
+async function saveVacs(){if(storeUrl())await remoteSet('vacs',vacs);lsSet('vacs',vacs);}
+async function saveCfg(){if(storeUrl())await remoteSet('cfg',cfg);lsSet('cfg',cfg);}
+async function saveSched(){if(storeUrl())await remoteSet('sched',S);lsSet('sched',S);}
+async function saveArchivedCounts(){if(storeUrl())await remoteSet('archivedCounts',archivedCounts);lsSet('archivedCounts',archivedCounts);}
+
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function today(){return new Date().toISOString().split("T")[0];}
+function tds(y,m,d){return y+"-"+String(m+1).padStart(2,"0")+"-"+String(d).padStart(2,"0");}
+function dow(ds){return new Date(ds+"T12:00:00").getDay();}
+function isW(ds){var d=dow(ds);return d===0||d===6;}
+function isSt(ds){return !!STATS[ds];}
+function fmt(ds){try{return new Date(ds+"T12:00:00").toLocaleDateString("en-CA",{weekday:"short",month:"short",day:"numeric"});}catch(e){return ds;}}
+function fmts(ds){try{return new Date(ds+"T12:00:00").toLocaleDateString("en-CA",{month:"short",day:"numeric"});}catch(e){return ds;}}
+function nameOf(e){return EM[e]||(function(){var p=e.split("@")[0].split(".");var l=p[p.length-1];return l.charAt(0).toUpperCase()+l.slice(1);})();}
+function myR(ds){var d=S[ds];if(!d)return[];var r=[];["call1","call2","NI","EP","TEE"].forEach(function(k){if(d[k]===user)r.push(k);});if((d.CC||[]).indexOf(user)>=0)r.push("CC");return r;}
+function compat(a,b){return(["call1","call2"].indexOf(a)>=0&&["call1","call2"].indexOf(b)>=0)||a===b;}
+function vacActive(){var td=today();return cfg.vacWindowOpen<=td&&cfg.vacWindowClose>=td;}
+function vacOpen(){return cfg.vacWindowOpen<=today();}
+function vacClosed(){return cfg.vacWindowClose<today();}
+function myVacDays(){return vacs.filter(function(v){return v.name===user;}).reduce(function(a,v){return a+(v.dates?v.dates.length:0);},0);}
+function pendingSwaps(){return swaps.filter(function(r){return r.tgt===user&&r.status==="pending";}).length;}
+
+function toast(msg,err){
+  var t=document.createElement("div");t.className="toast";if(err)t.style.background="#ef4444";t.textContent=msg;document.body.appendChild(t);
+  setTimeout(function(){t.style.opacity="0";t.style.transition="opacity 0.3s";setTimeout(function(){t.remove();},300);},2500);
+}
+function el(tag,attrs,html){
+  var e=document.createElement(tag);
+  if(attrs)Object.entries(attrs).forEach(function(kv){if(kv[0]==="css")e.style.cssText=kv[1];else if(kv[0]==="cls")e.className=kv[1];else e.setAttribute(kv[0],kv[1]);});
+  if(html!==undefined)e.innerHTML=html;return e;
+}
+
+// ── RENDER SHELL ──────────────────────────────────────────────────────────────
+function render(){
+  var main=document.getElementById("main");
+  var nav=document.getElementById("nav");
+  var so=document.getElementById("signout");
+  var icsB=document.getElementById("icsBtn");
+  var sh=document.getElementById("subhdr");
+  var at=document.getElementById("adminTab");
+  if(!user){
+    nav.style.display="none";so.style.display="none";icsB.style.display="none";
+    sh.textContent="Jan\u2013Jun 2026";main.innerHTML="";main.appendChild(loginView());return;
+  }
+  sh.textContent="Dr. "+user+(isAdmin?" \u00b7 Admin":"")+" \u00b7 Jan\u2013Jun 2026";
+  nav.style.display="flex";so.style.display="block";icsB.style.display="block";
+  at.style.display=isAdmin?"block":"none";
+  // update tab badges
+  Array.from(nav.querySelectorAll(".tb")).forEach(function(b){
+    var t=b.dataset.tab;var lbl=b.dataset.base||b.textContent;
+    b.dataset.base=b.dataset.base||b.textContent;
+    if(t==="swaps"){b.textContent=lbl.split("(")[0].trim()+(pendingSwaps()>0?" ("+pendingSwaps()+")":"");}
+    else if(t==="vac"){b.textContent=lbl.split("\u25cf")[0].trim()+(vacActive()?" \u25cf":"");}
+    else b.textContent=b.dataset.base;
+    b.className="tb"+(b.dataset.tab===curTab?" on":"");
+  });
+  main.innerHTML="";
+  if(curTab==="cal")main.appendChild(calView());
+  else if(curTab==="mine")main.appendChild(mineView());
+  else if(curTab==="vac")main.appendChild(vacView());
+  else if(curTab==="swaps")main.appendChild(swapsView());
+  else if(curTab==="counts")main.appendChild(countsView());
+  else if(curTab==="admin")main.appendChild(adminView());
+  if(swapM)main.appendChild(swapModalEl());
+  if(vacM)main.appendChild(vacModalEl());
+}
+
+// ── LOGIN ─────────────────────────────────────────────────────────────────────
+function loginView(){
+  var wrap=el("div",{css:"min-height:calc(100vh - 46px);display:flex;align-items:center;justify-content:center;padding:16px"});
+  var box=el("div",{css:"background:white;border-radius:18px;padding:28px;max-width:380px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,0.10);border:1px solid #e2e8f0"});
+  box.innerHTML='<div style="text-align:center;margin-bottom:22px"><div style="font-size:36px;margin-bottom:8px">&#127973;</div><div style="font-size:20px;font-weight:800;color:#0d1b2a">NYGH Cardiology</div><div style="font-size:11px;color:#94a3b8;margin-top:4px;letter-spacing:0.8px;text-transform:uppercase">Schedule Portal &middot; Jan&ndash;Jun 2026</div></div><label style="display:block;font-size:11px;font-weight:700;color:#475569;letter-spacing:0.8px;margin-bottom:6px;text-transform:uppercase">Hospital Email</label>';
+  var inp=el("input",{type:"email",placeholder:"firstname.lastname@nygh.on.ca",css:"width:100%;padding:12px 14px;border:1px solid #cbd5e1;border-radius:10px;font-size:14px;color:#1e293b;background:#f8fafc;outline:none;font-family:inherit;box-sizing:border-box;margin-bottom:5px"});
+  var err=el("div",{css:"color:#ef4444;font-size:12px;min-height:18px;margin-bottom:10px"});
+  var btn=el("button",{cls:"btn btn-blue"},null);btn.textContent="Sign In \u2192";
+  btn.onclick=function(){
+    var e=inp.value.trim().toLowerCase();
+    if(!e){err.textContent="Enter your email";return;}
+    if(!e.endsWith("@"+DOMAIN)){err.textContent="Must be @"+DOMAIN;return;}
+    user=nameOf(e);isAdmin=e===ADMIN_EMAIL;render();
+  };
+  inp.onkeydown=function(e){if(e.key==="Enter")btn.click();};
+
+  var icsBtn=el("button",{cls:"btn btn-purple",css:"margin-top:8px"},null);icsBtn.textContent="\u2B07 Download Full .ics Calendar";
+  icsBtn.onclick=function(){downloadFullICS();};
+
+  var printBtn=el("button",{cls:"btn btn-teal",css:"margin-top:8px"},null);printBtn.textContent="\uD83D\uDDD3 View & Print Full Schedule";
+  printBtn.onclick=function(){openPrintSchedule();};
+
+  box.appendChild(inp);box.appendChild(err);box.appendChild(btn);box.appendChild(icsBtn);box.appendChild(printBtn);
+  wrap.appendChild(box);return wrap;
+}
+
+// ── CALENDAR ──────────────────────────────────────────────────────────────────
+function calView(){
+  var Y=2026,td=today(),fd=new Date(Y,month,1).getDay(),dim=new Date(Y,month+1,0).getDate();
+  var wrap=el("div",{});
+  var nav=el("div",{css:"display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"});
+  var prev=el("button",{css:"background:white;border:1px solid #e2e8f0;border-radius:8px;padding:5px 13px;font-size:16px;cursor:"+(month>0?"pointer":"default")+";color:"+(month>0?"#1e293b":"#d1d5db")},"\u2039");prev.onclick=function(){if(month>0){month--;render();}};
+  var nxt=el("button",{css:"background:white;border:1px solid #e2e8f0;border-radius:8px;padding:5px 13px;font-size:16px;cursor:"+(month<5?"pointer":"default")+";color:"+(month<5?"#1e293b":"#d1d5db")},"\u203a");nxt.onclick=function(){if(month<5){month++;render();}};
+  var title=el("div",{css:"text-align:center"},'<div style="font-weight:800;font-size:16px;color:#0d1b2a">'+MN[month]+' 2026</div><div style="font-size:9px;color:#94a3b8;margin-top:1px">&#9733; = your shift &middot; tap to swap</div>');
+  nav.appendChild(prev);nav.appendChild(title);nav.appendChild(nxt);wrap.appendChild(nav);
+  var hrow=el("div",{cls:"grid",css:"margin-bottom:2px"});
+  ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].forEach(function(d){hrow.appendChild(el("div",{cls:"dh"},d));});wrap.appendChild(hrow);
+  var grid=el("div",{cls:"grid"});
+  for(var i=0;i<(fd===0?6:fd-1);i++)grid.appendChild(el("div",{}));
+  for(var d=1;d<=dim;d++){
+    (function(day){
+      var ds=tds(Y,month,day),data=S[ds]||{},isT=ds===td,wk=isW(ds),st=isSt(ds),mr=myR(ds),hm=mr.length>0;
+      var cell=el("div",{cls:"cell"+(wk?" wk":"")+(hm?" me":"")+(isT?" td2":"")+(st?" st":""),css:"min-height:"+(wk||st?"44":"150")+"px"});
+      var dn=el("div",{css:"display:flex;align-items:center;justify-content:space-between;margin-bottom:1px"});
+      dn.innerHTML='<span style="font-size:9px;font-weight:800;color:'+(isT?"#1d4ed8":hm?"#92400e":st?"#dc2626":wk?"#9ca3af":"#6b7280")+'">'+day+'</span>'+(st?'<span style="font-size:7px">&#127464;&#127462;</span>':'');
+      cell.appendChild(dn);
+      function pill(role,name,empty){
+        var rc=RC[role],p=el("div",{cls:"pill"+(empty?" em":"")+(name===user&&!empty?" mine":"")});
+        if(name===user&&!empty)p.style.background=rc.c;
+        var lbl=el("span",{cls:"pl",css:"color:"+(name===user&&!empty?"rgba(255,255,255,0.85)":rc.c)},rc.s);
+        var nm=el("span",{cls:"pn",css:(name===user&&!empty?"color:white":"")},empty?"\u2014":(name===user?"\u2605 "+name:name));
+        p.appendChild(lbl);p.appendChild(nm);
+        if(name===user&&!empty)p.onclick=function(){swapM={date:ds,role:role};render();};
+        return p;
+      }
+      if(wk||st){if(data.call1)cell.appendChild(pill("call1",data.call1,false));if(data.call2)cell.appendChild(pill("call2",data.call2,false));}
+      else{if(data.call1)cell.appendChild(pill("call1",data.call1,false));if(data.call2)cell.appendChild(pill("call2",data.call2,false));(data.CC||[]).forEach(function(n){cell.appendChild(pill("CC",n,false));});if(data.NI)cell.appendChild(pill("NI",data.NI,false));cell.appendChild(pill("EP",data.EP||null,!data.EP));cell.appendChild(pill("TEE",data.TEE||null,!data.TEE));}
+      grid.appendChild(cell);
+    })(d);
+  }
+  wrap.appendChild(grid);
+  var leg=el("div",{css:"margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;border-top:1px solid #f1f5f9;padding-top:8px"});
+  Object.entries(RC).forEach(function(e){var v=e[1];var item=el("div",{css:"display:flex;align-items:center;gap:4px;font-size:9px;color:#64748b"});item.innerHTML='<div style="width:9px;height:9px;border-radius:2px;background:'+v.c+'"></div><strong>'+v.s+'</strong> '+v.l;leg.appendChild(item);});
+  wrap.appendChild(leg);return wrap;
+}
+
+// ── MY SHIFTS ─────────────────────────────────────────────────────────────────
+function mineView(){
+  var td=today(),shifts=[];
+  Object.entries(S).filter(function(e){return e[0]>=td;}).sort(function(a,b){return a[0].localeCompare(b[0]);}).forEach(function(e){var date=e[0],day=e[1];["call1","call2","NI","EP","TEE"].forEach(function(r){if(day[r]===user)shifts.push({date:date,role:r});});if((day.CC||[]).indexOf(user)>=0)shifts.push({date:date,role:"CC"});});
+  var wrap=el("div",{});
+  wrap.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px"><h2 style="font-size:15px;font-weight:800;color:#0d1b2a">Upcoming Shifts</h2><span style="font-size:11px;color:#94a3b8;background:white;padding:2px 10px;border-radius:20px;border:1px solid #e2e8f0;font-weight:600">'+shifts.length+'</span></div>';
+  if(!shifts.length){wrap.appendChild(el("div",{css:"text-align:center;color:#94a3b8;padding:40px 0"},"No upcoming shifts"));return wrap;}
+  var grp={};shifts.forEach(function(s){var m=s.date.slice(0,7);if(!grp[m])grp[m]=[];grp[m].push(s);});
+  Object.entries(grp).forEach(function(e){
+    var mk=e[0],arr=e[1];
+    wrap.appendChild(el("div",{css:"font-size:10px;font-weight:800;color:#64748b;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:7px;margin-top:10px"},new Date(mk+"-01T12:00:00").toLocaleDateString("en-CA",{month:"long",year:"numeric"})));
+    arr.forEach(function(s){
+      var rc=RC[s.role],row=el("div",{cls:"srow"});
+      row.innerHTML='<div><div style="font-weight:700;color:'+(isSt(s.date)?"#dc2626":"#1e293b")+';font-size:13px">'+fmt(s.date)+(isSt(s.date)?" &#127464;&#127462;":"")+'</div><div style="margin-top:3px;display:inline-block;background:'+rc.c+';color:white;padding:2px 9px;border-radius:20px;font-size:9px;font-weight:700">'+rc.l+'</div></div>';
+      var btn=el("button",{css:"background:#f59e0b;color:white;border:none;border-radius:8px;padding:7px 12px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0"},"\u21c4 Swap");
+      btn.onclick=(function(d,r){return function(){swapM={date:d,role:r};render();};})(s.date,s.role);
+      row.appendChild(btn);wrap.appendChild(row);
+    });
+  });
+  return wrap;
+}
+
+// ── VACATION ──────────────────────────────────────────────────────────────────
+function vacView(){
+  var wrap=el("div",{}),td=today();
+  var active=vacActive(),closed=vacClosed(),open=vacOpen();
+  var bannerCls=closed?"banner red":active?"banner green":"banner blue";
+  var bannerTxt=closed?"&#128274; Submission window closed &mdash; contact Dr. Bajaj":active?"&#128994; Window open for "+cfg.schedulePeriodLabel+" &middot; Closes "+fmts(cfg.vacWindowClose)+" &middot; Submissions are final":"&#9203; Window opens "+fmts(cfg.vacWindowOpen)+" for "+cfg.schedulePeriodLabel;
+  wrap.appendChild(el("div",{cls:bannerCls,css:"font-size:12px;font-weight:600"},bannerTxt));
+  var used=myVacDays(),rem=cfg.maxVacDays-used,pct=Math.min(100,Math.round(used/cfg.maxVacDays*100));
+  var quota=el("div",{cls:"card"});
+  quota.innerHTML='<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-weight:700;font-size:12px">Quota &mdash; '+cfg.schedulePeriodLabel+'</span><span style="font-weight:800;font-size:12px;color:'+(rem<=2?"#dc2626":"#0d9488")+'">'+rem+' days left</span></div><div style="background:#f1f5f9;border-radius:20px;height:7px;overflow:hidden"><div style="height:100%;border-radius:20px;background:'+(pct>90?"#ef4444":pct>70?"#f59e0b":"#0d9488")+';width:'+pct+'%"></div></div><div style="display:flex;justify-content:space-between;margin-top:4px;font-size:10px;color:#94a3b8"><span>'+used+' submitted</span><span>Max '+cfg.maxVacDays+'</span></div>';
+  wrap.appendChild(quota);
+  if(active&&rem>0){var sb=el("button",{cls:"btn btn-blue"},null);sb.textContent="+ Submit Vacation Dates";sb.onclick=function(){vacM=true;render();};wrap.appendChild(sb);}
+  wrap.appendChild(el("h3",{css:"font-size:13px;font-weight:800;color:#0d1b2a;margin:14px 0 8px"},"My Submitted Dates"));
+  var myV=vacs.filter(function(v){return v.name===user;});
+  if(!myV.length){wrap.appendChild(el("div",{css:"color:#94a3b8;font-size:12px"},active?"None yet — use the button above":"No vacation dates submitted"));return wrap;}
+  myV.slice().reverse().forEach(function(v){
+    var c=el("div",{cls:"card"});
+    c.innerHTML='<div style="font-weight:700;font-size:12px;margin-bottom:3px">'+v.dates.length+' day'+(v.dates.length!==1?"s":"")+'</div><div style="font-size:10px;color:#64748b">'+v.dates.slice(0,5).map(fmts).join(" \u00b7 ")+(v.dates.length>5?" +"+(v.dates.length-5)+" more":"")+'</div>'+(v.reason?'<div style="font-size:10px;color:#94a3b8;margin-top:3px;font-style:italic">"'+v.reason+'"</div>':"")+'<div style="margin-top:5px;display:inline-block;background:#d1fae5;color:#065f46;padding:1px 9px;border-radius:20px;font-size:9px;font-weight:700">&#10003; Confirmed</div>';
+    wrap.appendChild(c);
+  });
+  return wrap;
+}
+
+// ── SWAPS ─────────────────────────────────────────────────────────────────────
+function swapsView(){
+  var incoming=swaps.filter(function(r){return r.tgt===user&&r.status==="pending";}),mine=swaps.filter(function(r){return r.req===user;});
+  var wrap=el("div",{});
+  var ih=el("div",{css:"display:flex;align-items:center;gap:8px;margin-bottom:10px"});
+  ih.innerHTML='<h2 style="font-size:14px;font-weight:800;color:#0d1b2a">Incoming</h2>'+(incoming.length?'<span style="background:#ef4444;color:white;border-radius:20px;padding:1px 7px;font-size:10px;font-weight:800">'+incoming.length+'</span>':"");
+  wrap.appendChild(ih);
+  if(!incoming.length){wrap.appendChild(el("div",{css:"color:#94a3b8;font-size:12px;margin-bottom:18px"},"No pending requests"));}
+  incoming.forEach(function(r){
+    var rrc=RC[r.reqR],trc=RC[r.tgtR],card=el("div",{css:"background:white;border-radius:11px;border-left:4px solid #0d9488;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,0.05);margin-bottom:9px"});
+    card.innerHTML='<div style="font-weight:800;font-size:13px;margin-bottom:7px">Dr. '+r.req+' &rarr; swap request</div><div style="font-size:11px;color:#475569;line-height:2.2"><div><span style="background:'+rrc.c+';color:white;padding:1px 7px;border-radius:4px;font-size:9px;font-weight:700;margin-right:5px">'+rrc.l+'</span>'+fmt(r.reqD)+' &rarr; <strong>you take</strong></div><div><span style="background:'+trc.c+';color:white;padding:1px 7px;border-radius:4px;font-size:9px;font-weight:700;margin-right:5px">'+trc.l+'</span>'+fmt(r.tgtD)+' &rarr; <strong>they take</strong></div></div>'+(r.msg?'<div style="margin-top:7px;font-size:11px;color:#64748b;font-style:italic;background:#f8fafc;padding:6px 10px;border-radius:6px">"'+r.msg+'"</div>':"");
+    var btns=el("div",{css:"display:flex;gap:7px;margin-top:10px"});
+    var app=el("button",{css:"flex:1;background:#0d9488;color:white;border:none;border-radius:8px;padding:9px 0;font-size:11px;font-weight:800;cursor:pointer"},"\u2713 Approve \u2014 Update Schedule");
+    app.onclick=(function(req){return function(){
+      var rD=S[req.reqD],tD=S[req.tgtD];
+      if(rD&&tD){
+        if(req.reqR==="CC"){rD.CC=(rD.CC||[]).map(function(n){return n===req.req?req.tgt:n;});}else if(rD[req.reqR]===req.req)rD[req.reqR]=req.tgt;
+        if(req.tgtR==="CC"){tD.CC=(tD.CC||[]).map(function(n){return n===req.tgt?req.req:n;});}else if(tD[req.tgtR]===req.tgt)tD[req.tgtR]=req.req;
+      }
+      req.status="approved";saveSwaps();saveSched();toast("\u2713 Swap approved \u2014 schedule updated");render();
+    };})(r);
+    var dec=el("button",{css:"width:70px;background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;border-radius:8px;padding:9px 0;font-size:11px;cursor:pointer"},"Decline");
+    dec.onclick=(function(req){return function(){req.status="declined";saveSwaps();toast("Declined");render();};})(r);
+    btns.appendChild(app);btns.appendChild(dec);card.appendChild(btns);wrap.appendChild(card);
+  });
+  wrap.appendChild(el("h2",{css:"font-size:14px;font-weight:800;color:#0d1b2a;margin-bottom:10px;margin-top:10px"},"My Sent"));
+  if(!mine.length){wrap.appendChild(el("div",{css:"color:#94a3b8;font-size:12px"},"None sent yet"));return wrap;}
+  mine.slice().reverse().forEach(function(r){
+    var cs=r.status==="approved"?"chip-approved":r.status==="declined"?"chip-declined":"chip-pending";
+    var row=el("div",{cls:"srow"});
+    row.innerHTML='<div><div style="font-size:12px;font-weight:700">Swap w/ Dr. '+r.tgt+'</div><div style="font-size:10px;color:#94a3b8;margin-top:2px">'+(RC[r.reqR]?RC[r.reqR].l:r.reqR)+' &middot; '+fmt(r.reqD)+'</div></div><span class="chip '+cs+'">'+r.status+'</span>';
+    wrap.appendChild(row);
+  });
+  return wrap;
+}
+
+// ── COUNTS ────────────────────────────────────────────────────────────────────
+function computeCurrentCounts(){
+  var cts={},en=function(n){if(!cts[n])cts[n]={c1:0,c2:0,CC:0,NI:0,EP:0,TEE:0,wk:0,st:0};};
+  Object.entries(S).forEach(function(e){var ds=e[0],day=e[1],w=isW(ds),s=isSt(ds);["call1","call2","NI","EP","TEE"].forEach(function(r){if(day[r]){en(day[r]);var k=r==="call1"?"c1":r==="call2"?"c2":r;cts[day[r]][k]++;if((r==="call1"||r==="call2")&&w)cts[day[r]].wk++;if(r==="call1"&&s)cts[day[r]].st++;}});(day.CC||[]).forEach(function(n){en(n);cts[n].CC++;});});
+  return cts;
+}
+function mergeCounts(cur,arc){
+  var merged={};var keys=new Set(Object.keys(cur).concat(Object.keys(arc)));
+  keys.forEach(function(n){merged[n]={c1:0,c2:0,CC:0,NI:0,EP:0,TEE:0,wk:0,st:0};["c1","c2","CC","NI","EP","TEE","wk","st"].forEach(function(k){merged[n][k]=(cur[n]?cur[n][k]||0:0)+(arc[n]?arc[n][k]||0:0);});});
+  return merged;
+}
+function countsView(){
+  var showMode=_countMode;
+  var curCts=computeCurrentCounts();
+  var cts=showMode==="total"?mergeCounts(curCts,archivedCounts):curCts;
+  var ord=["Bajaj","Morant","Hammer","Siu","Huang","Lalonde","Cai","Cheng","Rose","Myron","Kagal","Teitlebaum","Lubelsky"].filter(function(d){return cts[d];});
+  var ft=ord.filter(function(d){return DT[d]==="FT";});
+  var aC=ft.length?Math.round(ft.reduce(function(a,d){return a+(cts[d].c1||0)+(cts[d].c2||0);},0)/ft.length):0;
+  var aCC=ft.length?Math.round(ft.reduce(function(a,d){return a+(cts[d].CC||0);},0)/ft.length):0;
+  var aNI=ft.length?Math.round(ft.reduce(function(a,d){return a+(cts[d].NI||0);},0)/ft.length):0;
+  var hasArchive=Object.keys(archivedCounts).length>0;
+  var wrap=el("div",{});
+  // ── Header row ──────────────────────────────────────────────────────────
+  var hdrRow=el("div",{css:"display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"});
+  hdrRow.appendChild(el("h2",{css:"font-size:15px;font-weight:800;color:#0d1b2a"},"Counts"));
+  var tgl=el("div",{css:"display:flex;gap:5px"});
+  var curBtn=el("button",{css:"padding:5px 10px;font-size:10px;font-weight:700;border-radius:7px;border:none;cursor:pointer;background:"+(showMode==="current"?"#1e40af":"#f1f5f9")+";color:"+(showMode==="current"?"white":"#64748b")},"Current");
+  var totBtn=el("button",{css:"padding:5px 10px;font-size:10px;font-weight:700;border-radius:7px;border:none;cursor:"+(hasArchive?"pointer":"default")+";background:"+(showMode==="total"?"#1e40af":"#f1f5f9")+";color:"+(showMode==="total"?"white":hasArchive?"#64748b":"#cbd5e1")},"Year Total");
+  curBtn.onclick=function(){_countMode="current";render();};
+  totBtn.onclick=function(){if(hasArchive){_countMode="total";render();}else{toast("Archive current period first","err");}};
+  tgl.appendChild(curBtn);tgl.appendChild(totBtn);hdrRow.appendChild(tgl);wrap.appendChild(hdrRow);
+  // ── Admin archive button ────────────────────────────────────────────────
+  if(isAdmin){
+    var archRow=el("div",{css:"display:flex;align-items:center;gap:8px;margin-bottom:8px"});
+    var schedRange=Object.keys(S).sort();
+    var schedLabel=schedRange.length?fmts(schedRange[0])+" - "+fmts(schedRange[schedRange.length-1]):"";
+    archRow.appendChild(el("div",{css:"font-size:10px;color:#64748b;flex:1"},"Period: "+schedLabel+(hasArchive?" | Archive loaded":"")));
+    var archBtn=el("button",{css:"background:#f59e0b;color:white;border:none;border-radius:7px;padding:5px 10px;font-size:10px;font-weight:700;cursor:pointer;flex-shrink:0;white-space:nowrap"},"Save Period to Archive");
+    archBtn.onclick=function(){
+      var cur=computeCurrentCounts();
+      Object.entries(cur).forEach(function(e){
+        var n=e[0],c=e[1];
+        if(!archivedCounts[n])archivedCounts[n]={c1:0,c2:0,CC:0,NI:0,EP:0,TEE:0,wk:0,st:0};
+        ["c1","c2","CC","NI","EP","TEE","wk","st"].forEach(function(k){archivedCounts[n][k]=(archivedCounts[n][k]||0)+(c[k]||0);});
+      });
+      saveArchivedCounts();toast("Period archived - now load next schedule");render();
+    };
+    archRow.appendChild(archBtn);wrap.appendChild(archRow);
+  }
+  // ── Banner ──────────────────────────────────────────────────────────────
+  var bannerTxt=showMode==="total"
+    ? "Year-to-date totals (archived + current period)"
+    : "FT avg: "+aC+" call   "+aCC+" CC   "+aNI+" NI   |   % = variance from avg";
+  wrap.appendChild(el("div",{cls:"banner "+(showMode==="total"?"yellow":"blue"),css:"font-size:11px;margin-bottom:10px"},bannerTxt));
+  // ── Table ───────────────────────────────────────────────────────────────
+  var scroll=el("div",{css:"overflow-x:auto;border-radius:10px;border:1px solid #e2e8f0;background:white"});
+  var tbl=el("table",{});
+  var thead=document.createElement("thead");
+  var hr=document.createElement("tr");
+  [
+    {t:"Doctor",s:"text-align:left;padding-left:10px"},
+    {t:"1st",s:"color:#1e3a8a"},{t:"2nd",s:"color:#2563eb"},{t:"Total",s:""},
+    {t:"CC",s:"color:#0d9488"},{t:"NI",s:"color:#b45309"},
+    {t:"EP",s:"color:#6d28d9"},{t:"TEE",s:"color:#9f1239"},{t:"Wknd",s:""}
+  ].forEach(function(col){var th=document.createElement("th");th.style.cssText=col.s;th.textContent=col.t;hr.appendChild(th);});
+  thead.appendChild(hr);tbl.appendChild(thead);
+  var tbody=document.createElement("tbody");
+  function vb(v,avg){if(!avg||!v)return"";var p=Math.round(((v-avg)/avg)*100);if(Math.abs(p)<=5)return"";var cl=Math.abs(p)>20?"#dc2626":Math.abs(p)>10?"#d97706":"#0d9488";return "<br><span style='font-size:7px;color:"+cl+";font-weight:700'>"+(p>0?"+":"")+p+"%</span>";}
+  ord.forEach(function(dr,i){
+    var c=cts[dr]||{},tot=(c.c1||0)+(c.c2||0),tp=DT[dr];
+    var row=document.createElement("tr");row.style.background=i%2===0?"white":"#fafafa";
+    row.innerHTML="<td style='padding:6px 4px 6px 10px;font-weight:700;font-size:11px'>"+dr+"<span style='margin-left:4px;font-size:7px;background:"+(tp==="FT"?"#dbeafe":tp==="PT"?"#fef3c7":"#dcfce7")+";color:"+(tp==="FT"?"#1e40af":tp==="PT"?"#92400e":"#166534")+";padding:1px 4px;border-radius:3px;font-weight:800'>"+tp+"</span></td><td style='text-align:center;color:#1e3a8a'>"+(c.c1||0)+"</td><td style='text-align:center;color:#2563eb'>"+(c.c2||0)+"</td><td style='text-align:center;font-weight:900;vertical-align:top'>"+tot+vb(tot,aC)+"</td><td style='text-align:center;color:#0d9488;vertical-align:top'>"+(c.CC||0)+vb(c.CC||0,aCC)+"</td><td style='text-align:center;color:#b45309;vertical-align:top'>"+(c.NI||0)+vb(c.NI||0,aNI)+"</td><td style='text-align:center;color:#6d28d9'>"+(c.EP||0)+"</td><td style='text-align:center;color:#9f1239'>"+(TEE_WKS[dr]||0)+"</td><td style='text-align:center'>"+(c.wk||0)+"</td>";
+    tbody.appendChild(row);
+  });
+  var totRow=document.createElement("tr");totRow.style.cssText="border-top:2px solid #e2e8f0;background:#f0f4f8;font-weight:900";
+  totRow.innerHTML="<td style='padding:6px 4px 6px 10px;font-weight:900;font-size:11px'>TOTAL</td>"
+    +["c1","c2"].map(function(k){return "<td style='text-align:center'>"+ord.reduce(function(a,d){return a+(cts[d][k]||0);},0)+"</td>";}).join("")
+    +"<td style='text-align:center;font-weight:900'>"+ord.reduce(function(a,d){return a+(cts[d].c1||0)+(cts[d].c2||0);},0)+"</td>"
+    +["CC","NI","EP","wk"].map(function(k){return "<td style='text-align:center'>"+ord.reduce(function(a,d){return a+(cts[d][k]||0);},0)+"</td>";}).join("")+"<td style='text-align:center;color:#9f1239'>"+ord.reduce(function(a,d){return a+(TEE_WKS[d]||0);},0)+"</td>";
+  tbody.appendChild(totRow);tbl.appendChild(tbody);scroll.appendChild(tbl);wrap.appendChild(scroll);
+  return wrap;
+}
+function adminView(){
+  var wrap=el("div",{});
+  wrap.appendChild(el("h2",{css:"font-size:15px;font-weight:800;color:#0d1b2a;margin-bottom:12px"},"Admin Settings"));
+  var sbar=el("div",{css:"margin-bottom:16px;display:flex;flex-wrap:wrap"});
+  [{id:"window",l:"&#9200; Window"},{id:"vacations",l:"&#127796; Vacations"},{id:"schedule",l:"&#128203; Schedule"},{id:"generate",l:"&#129302; Generate"}].forEach(function(s){
+    var b=el("button",{cls:"sec-btn "+(adminSec===s.id?"on":"off")});b.innerHTML=s.l;b.onclick=function(){adminSec=s.id;render();};sbar.appendChild(b);
+  });
+  wrap.appendChild(sbar);
+  if(adminSec==="window")wrap.appendChild(windowSection());
+  else if(adminSec==="vacations")wrap.appendChild(vacationsSection());
+  else if(adminSec==="schedule")wrap.appendChild(scheduleSection());
+  else if(adminSec==="generate")wrap.appendChild(generateSection());
+  return wrap;
+}
+
+function windowSection(){
+  var wrap=el("div",{});
+  var td=today(),wO=cfg.vacWindowOpen<=td,wC=cfg.vacWindowClose<td;
+  wrap.appendChild(el("div",{cls:"banner "+(wC?"red":wO?"green":"blue"),css:"font-size:12px;font-weight:600;margin-bottom:12px"},"Vacation Window: "+(wC?"Closed":wO?"Open":"Not yet open")+" &mdash; "+cfg.vacWindowOpen+" &rarr; "+cfg.vacWindowClose));
+  var fields=[{l:"NEXT PERIOD LABEL",k:"schedulePeriodLabel",t:"text",ph:"e.g. Jul-Dec 2026"},{l:"WINDOW OPENS",k:"vacWindowOpen",t:"date"},{l:"WINDOW CLOSES",k:"vacWindowClose",t:"date"},{l:"SCHEDULE START",k:"scheduleStart",t:"date"},{l:"SCHEDULE END",k:"scheduleEnd",t:"date"},{l:"MAX VAC DAYS / MD",k:"maxVacDays",t:"number"},{l:"VERCEL PROXY URL",k:"proxyUrl",t:"text",ph:"https://your-proxy.vercel.app/api/proxy"}];
+  var inputs={};
+  fields.forEach(function(f){
+    wrap.appendChild(el("label",{css:"display:block;font-size:10px;font-weight:700;color:#374151;letter-spacing:0.5px;margin-bottom:4px;margin-top:10px;text-transform:uppercase"},f.l));
+    var inp=el("input",{type:f.t||"text",cls:"inp",css:"margin-bottom:0"});inp.value=cfg[f.k]||"";if(f.ph)inp.placeholder=f.ph;if(f.t==="number"){inp.min=1;inp.max=30;}
+    inputs[f.k]=inp;wrap.appendChild(inp);
+  });
+  if(!cfg.proxyUrl){wrap.appendChild(el("div",{css:"font-size:10px;color:#94a3b8;margin-top:4px"},"Proxy URL required for AI schedule generation"));}
+  var btn=el("button",{cls:"btn btn-blue",css:"margin-top:14px"},"Save Settings");
+  btn.onclick=function(){fields.forEach(function(f){cfg[f.k]=f.t==="number"?parseInt(inputs[f.k].value)||15:inputs[f.k].value;});saveCfg();toast("Settings saved \u2713");render();};
+  wrap.appendChild(btn);return wrap;
+}
+
+function vacationsSection(){
+  var wrap=el("div",{});
+  wrap.appendChild(el("div",{css:"font-weight:700;font-size:13px;color:#0d1b2a;margin-bottom:12px"},"All Submitted \u2014 "+cfg.schedulePeriodLabel));
+  if(!vacs.length){wrap.appendChild(el("div",{css:"color:#94a3b8;font-size:12px"},"No vacation dates submitted yet"));return wrap;}
+  var byDoc={};vacs.forEach(function(v){if(!byDoc[v.name])byDoc[v.name]=[];(v.dates||[]).forEach(function(d){byDoc[v.name].push(d);});});
+  Object.entries(byDoc).sort().forEach(function(e){
+    var dr=e[0],dates=e[1];var c=el("div",{cls:"card"});
+    c.innerHTML='<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-weight:700;font-size:12px">Dr. '+dr+'</span><span style="font-size:10px;color:#94a3b8">'+dates.length+' days</span></div><div style="font-size:10px;color:#64748b">'+dates.sort().slice(0,6).map(fmts).join(" \u00b7 ")+(dates.length>6?" +"+(dates.length-6)+" more":"")+'</div>';
+    wrap.appendChild(c);
+  });
+  return wrap;
+}
+
+function scheduleSection(){
+  var wrap=el("div",{});
+  wrap.appendChild(el("div",{cls:"banner green",css:"font-size:11px;font-weight:600;margin-bottom:10px"},"\u2713 Jan\u2013Jun 2026 loaded &middot; "+Object.keys(S).length+" days"));
+  wrap.appendChild(el("div",{css:"font-size:11px;color:#64748b;margin-bottom:8px"},"To load a new schedule, paste the JSON below and click Load."));
+  var ta=el("textarea",{cls:"inp",css:"font-family:monospace;font-size:10px;height:100px;resize:vertical;margin-bottom:8px"});ta.placeholder='{"2026-07-07":{"call1":"Bajaj","call2":"Smith","CC":["Jones"],...}}';
+  var err=el("div",{css:"color:#ef4444;font-size:11px;min-height:16px;margin-bottom:6px"});
+  var btn=el("button",{cls:"btn btn-teal"},"Load New Schedule JSON");
+  btn.onclick=function(){try{var parsed=JSON.parse(ta.value);if(Object.keys(parsed).length<50){err.textContent="Too few dates — check JSON";return;}S=parsed;saveSched();ta.value="";err.textContent="";toast("\u2713 Schedule loaded \u2014 "+Object.keys(S).length+" days");render();}catch(e){err.textContent="Invalid JSON";}};
+  wrap.appendChild(ta);wrap.appendChild(err);wrap.appendChild(btn);
+  // Archive management
+  var hasArc=Object.keys(archivedCounts).length>0;
+  wrap.appendChild(el("div",{css:"margin-top:16px;border-top:1px solid #e2e8f0;padding-top:14px"}));
+  wrap.appendChild(el("div",{css:"font-weight:700;font-size:12px;color:#0d1b2a;margin-bottom:6px"},"Year-End Archive"));
+  wrap.appendChild(el("div",{css:"font-size:11px;color:#64748b;margin-bottom:8px"},"Before loading a new schedule, go to the Counts tab and click Archive Period. This adds the current period to the year-end running total."));
+  if(hasArc){
+    var arcInfo=el("div",{cls:"banner green",css:"font-size:11px;margin-bottom:8px"});
+    var arcDrs=Object.keys(archivedCounts);arcInfo.innerHTML="&#10003; Archive contains data for "+arcDrs.length+" doctors.";wrap.appendChild(arcInfo);
+    var clearBtn=el("button",{css:"background:#ef4444;color:white;border:none;border-radius:8px;padding:8px 14px;font-size:11px;font-weight:700;cursor:pointer;width:100%"},"Clear Archive (Year Reset)");
+    clearBtn.onclick=function(){archivedCounts={};saveArchivedCounts();toast("Archive cleared — year reset");render();};
+    wrap.appendChild(clearBtn);
+  } else {
+    wrap.appendChild(el("div",{cls:"banner blue",css:"font-size:11px"},"No archive yet. Archive the current period from the Counts tab before loading the next schedule."));
+  }
+  return wrap;
+}
+
+function generateSection(){
+  var wrap=el("div",{});
+  if(!cfg.proxyUrl){wrap.appendChild(el("div",{cls:"banner yellow",css:"font-size:11px;font-weight:600;margin-bottom:12px"},"&#9888; Set Vercel Proxy URL in the Window tab first"));} 
+  wrap.appendChild(el("div",{cls:"banner blue",css:"font-size:11px;margin-bottom:12px"},"<strong>AI Schedule Generator</strong> &mdash; After the vacation window closes, click Generate. Claude will use all submitted vacation dates and your department rules to produce the next 6-month schedule, which loads instantly for all MDs."));
+  var fields=[{l:"PERIOD LABEL",k:"gl",v:cfg.schedulePeriodLabel,ph:"Jul-Dec 2026"},{l:"START DATE",k:"gs",v:cfg.scheduleStart,t:"date"},{l:"GE",k:"ge",v:cfg.scheduleEnd,t:"date"}];
+  var gl=el("input",{type:"text",cls:"inp",css:"margin-bottom:8px"});gl.value=cfg.schedulePeriodLabel;gl.placeholder="Jul-Dec 2026";
+  wrap.appendChild(el("label",{css:"display:block;font-size:10px;font-weight:700;color:#374151;margin-bottom:4px;text-transform:uppercase"},"PERIOD LABEL"));wrap.appendChild(gl);
+  var gsDiv=el("div",{css:"display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px"});
+  var gs=el("input",{type:"date",cls:"inp"});gs.value=cfg.scheduleStart;
+  var ge=el("input",{type:"date",cls:"inp"});ge.value=cfg.scheduleEnd;
+  var gsW=el("div",{});gsW.appendChild(el("label",{css:"display:block;font-size:10px;font-weight:700;color:#374151;margin-bottom:4px;text-transform:uppercase"},"START"));gsW.appendChild(gs);
+  var geW=el("div",{});geW.appendChild(el("label",{css:"display:block;font-size:10px;font-weight:700;color:#374151;margin-bottom:4px;text-transform:uppercase"},"END"));geW.appendChild(ge);
+  gsDiv.appendChild(gsW);gsDiv.appendChild(geW);wrap.appendChild(gsDiv);
+  wrap.appendChild(el("label",{css:"display:block;font-size:10px;font-weight:700;color:#374151;margin-bottom:4px;text-transform:uppercase"},"STAT HOLIDAYS (date:name, comma-separated)"));
+  var statsInp=el("textarea",{cls:"inp",css:"font-family:monospace;font-size:10px;height:52px;resize:vertical;margin-bottom:8px"});
+  statsInp.value="2026-08-03:Civic Holiday,2026-09-07:Labour Day,2026-10-12:Thanksgiving,2026-11-11:Remembrance Day,2026-12-25:Christmas Day,2026-12-26:Boxing Day";
+  wrap.appendChild(statsInp);
+  // Vacation summary
+  var byDoc={};vacs.forEach(function(v){if(!byDoc[v.name])byDoc[v.name]=[];(v.dates||[]).forEach(function(d){byDoc[v.name].push(d);});});
+  var vacSumEl=el("div",{cls:"card",css:"margin-bottom:8px"});
+  vacSumEl.innerHTML='<div style="font-size:10px;font-weight:700;color:#64748b;margin-bottom:5px">VACATION DATA: '+vacs.length+' entries, '+Object.keys(byDoc).length+' doctors</div>'+(Object.keys(byDoc).length?Object.entries(byDoc).map(function(e){return'<div style="font-size:10px;color:#475569;margin-bottom:1px"><strong>'+e[0]+':</strong> '+e[1].sort().slice(0,4).join(", ")+(e[1].length>4?" +"+( e[1].length-4)+" more":"")+'</div>';}).join(""):'<div style="font-size:10px;color:#94a3b8">No vacation dates submitted yet</div>');
+  wrap.appendChild(vacSumEl);
+  // Year balance panel
+  if(Object.keys(archivedCounts).length>0){
+    var ftDrs2=["Bajaj","Morant","Hammer","Siu","Huang","Lalonde","Cai","Cheng","Rose","Myron","Kagal"];
+    var arcCalls=ftDrs2.map(function(d){return archivedCounts[d]?((archivedCounts[d].c1||0)+(archivedCounts[d].c2||0)):0;});
+    var arcAvgC=arcCalls.reduce(function(a,b){return a+b;},0)/ftDrs2.length;
+    var balEl=el("div",{cls:"card",css:"margin-bottom:8px;border-left:3px solid #f59e0b"});
+    balEl.innerHTML='<div style="font-size:10px;font-weight:700;color:#92400e;margin-bottom:6px">&#9878; YEAR-BALANCE MODE ACTIVE &mdash; Prior period loaded</div><div style="font-size:10px;color:#64748b;margin-bottom:6px">Generator will compensate for these imbalances from Jan&ndash;Jun:</div>';
+    var tbl2=el("table",{css:"font-size:9px;width:100%;border-collapse:collapse"});
+    tbl2.innerHTML="<thead><tr><th style='text-align:left;padding:3px 4px;color:#64748b'>Doctor</th><th style='text-align:center;padding:3px 4px;color:#64748b'>Prior Call</th><th style='text-align:center;padding:3px 4px;color:#64748b'>vs Avg</th><th style='text-align:center;padding:3px 4px;color:#64748b'>Action</th></tr></thead>";
+    var tb2=el("tbody",{});
+    ftDrs2.forEach(function(dr,idx){
+      var priorC=arcCalls[idx],diff=Math.round(priorC-arcAvgC);
+      var action=diff>2?"Reduce call":diff<-2?"Add call":"Balanced";
+      var actionCol=diff>2?"#dc2626":diff<-2?"#0d9488":"#64748b";
+      var row2=el("tr",{});row2.innerHTML='<td style="padding:3px 4px;font-weight:700">'+dr+'</td><td style="text-align:center;padding:3px 4px">'+priorC+'</td><td style="text-align:center;padding:3px 4px;color:'+(diff>0?"#dc2626":diff<0?"#0d9488":"#64748b")+';font-weight:700">'+(diff>0?"+":"")+diff+'</td><td style="text-align:center;padding:3px 4px;color:'+actionCol+';font-weight:700">'+action+'</td>';
+      tb2.appendChild(row2);
+    });
+    tbl2.appendChild(tb2);balEl.appendChild(tbl2);wrap.appendChild(balEl);
+  } else {
+    wrap.appendChild(el("div",{cls:"banner blue",css:"font-size:10px;margin-bottom:8px"},"&#9432; No prior period archived. Archive Jan&ndash;Jun from the Counts tab to enable year-balance generation."));
+  }
+  // Log output
+  var logEl=el("div",{cls:"log-box",css:"display:"+(genLog.length?"block":"none")});
+  genLog.forEach(function(l){var d=el("div",{css:"color:"+(l[0]==="\u2713"?"#34d399":l[0]==="\u2717"?"#f87171":"#94a3b8")},l);logEl.appendChild(d);});
+  if(genStatus==="loading"){logEl.appendChild(el("div",{css:"color:#60a5fa"},"\u29d7 Generating... (~30 seconds)"));}
+  wrap.appendChild(logEl);
+  // Error
+  if(genStatus==="error"){wrap.appendChild(el("div",{cls:"banner red",css:"font-size:11px;font-weight:600;margin-bottom:8px"},"\u2717 "+genLog[genLog.length-1]));}
+  // Preview success
+  if(genStatus==="done"&&genPreview){
+    var prev=el("div",{cls:"banner green",css:"font-size:12px;margin-bottom:8px"});prev.innerHTML="\u2713 <strong>"+Object.keys(genPreview).length+" days generated</strong> &mdash; Review counts tab after loading.";wrap.appendChild(prev);
+    var loadBtn=el("button",{cls:"btn btn-green"},"Load & Publish Schedule to All MDs");
+    loadBtn.onclick=function(){S=genPreview;saveSched();genStatus="loaded";genPreview=null;toast("\u2713 Schedule live for all MDs");render();};
+    wrap.appendChild(loadBtn);
+  }
+  if(genStatus==="loaded"){wrap.appendChild(el("div",{cls:"banner green",css:"font-size:12px;font-weight:700;text-align:center"},"\u2713 Schedule live \u2014 all MDs can see it"));}
+  // Generate button
+  if(genStatus!=="loading"&&genStatus!=="loaded"){
+    var genBtn=el("button",{cls:"btn "+(cfg.proxyUrl?"btn-blue":"btn-gray"),css:"margin-top:8px"},null);
+    genBtn.textContent=genStatus==="error"?"\uD83D\uDD04 Retry Generation":"\uD83E\uDD16 Generate Schedule with AI";
+    genBtn.onclick=function(){if(!cfg.proxyUrl)return;doGenerate(gl.value,gs.value,ge.value,statsInp.value,byDoc,archivedCounts);};
+    wrap.appendChild(genBtn);
+  }
+  return wrap;
+}
+
+function doGenerate(label,start,end,statsRaw,byDoc,arcCts){
+  genLog=[];genStatus="loading";genPreview=null;render();
+  var stats=statsRaw.split(",").map(function(x){var p=x.trim().split(":");return{date:p[0]&&p[0].trim(),name:p[1]&&p[1].trim()};}).filter(function(x){return x.date&&x.name;});
+  var vacText=Object.keys(byDoc).length?Object.entries(byDoc).map(function(e){return"  "+e[0]+": "+e[1].sort().join(", ");}).join("\n"):"  (none submitted)";
+  // Build year-balance guidance from archived counts
+  var balanceText="";
+  var ftDrs=["Bajaj","Morant","Hammer","Siu","Huang","Lalonde","Cai","Cheng","Rose","Myron","Kagal"];
+  if(arcCts&&Object.keys(arcCts).length>0){
+    var arcCallTots=ftDrs.map(function(d){return(arcCts[d]?((arcCts[d].c1||0)+(arcCts[d].c2||0)):0);});
+    var arcAvgCall=arcCallTots.reduce(function(a,b){return a+b;},0)/ftDrs.length;
+    var arcCCTots=ftDrs.map(function(d){return arcCts[d]?(arcCts[d].CC||0):0;});
+    var arcAvgCC=arcCCTots.reduce(function(a,b){return a+b;},0)/ftDrs.length;
+    var arcNITots=ftDrs.map(function(d){return arcCts[d]?(arcCts[d].NI||0):0;});
+    var arcAvgNI=arcNITots.reduce(function(a,b){return a+b;},0)/ftDrs.length;
+    var lines=["PRIOR PERIOD ACTUALS (Jan-Jun 2026) — use these to COMPENSATE in this schedule so year-end totals balance:","Doctor | Prior Call | Call vs Avg | Prior CC | CC vs Avg | Prior NI | NI vs Avg | PRIORITY"];
+    ftDrs.forEach(function(dr,idx){
+      var priorCall=arcCallTots[idx],priorCC=arcCCTots[idx],priorNI=arcNITots[idx];
+      var dCall=Math.round(priorCall-arcAvgCall),dCC=Math.round(priorCC-arcAvgCC),dNI=Math.round(priorNI-arcAvgNI);
+      var priority=Math.abs(dCall)>3||Math.abs(dCC)>3||Math.abs(dNI)>3?"HIGH":"LOW";
+      lines.push(dr+" | "+priorCall+" | "+(dCall>0?"+"+(dCall)+" OVER":dCall<0?Math.abs(dCall)+" UNDER":"balanced")+" | "+priorCC+" | "+(dCC>0?"+"+(dCC)+" OVER":dCC<0?Math.abs(dCC)+" UNDER":"balanced")+" | "+priorNI+" | "+(dNI>0?"+"+(dNI)+" OVER":dNI<0?Math.abs(dNI)+" UNDER":"balanced")+" | "+priority);
+    });
+    lines.push("\nTo achieve year-end balance, deliberately REDUCE assignments for OVER doctors and INCREASE for UNDER doctors. The goal is that (prior period + this period) totals are equal across all FT MDs.");
+    balanceText="\n\n"+lines.join("\n");
+  }
+
+  var prompt="You are a scheduling system for NYGH Cardiology. Generate a 6-month call schedule as a single valid JSON object and nothing else — no explanation, no markdown, no code fences.\n\nPERIOD: "+label+" ("+start+" to "+end+")\n\nDOCTORS:\n- FT: Bajaj, Morant, Hammer, Siu, Huang, Lalonde, Cai, Cheng, Rose, Myron, Kagal\n- PT: Teitlebaum (50% call volume, max 1 weekend per period)\n- CC only: Lubelsky\n\nSTAT HOLIDAYS:\n"+stats.map(function(s){return"  "+s.date+": "+s.name;}).join("\n")+"\n\nVACATION DAYS (no assignments):\n"+vacText+balanceText+"\n\nRULES:\n1. CALL: weekly pairs Mon-Sun. Doctor A: 1st call M/W/F, 2nd call T/Th. Doctor B: 1st call T/Th/Sat/Sun, 2nd call M/W/F. B gets weekend (no 2nd call on weekends). No consecutive weeks.\n2. EP: M/W/F only. Bajaj ~2/3, Kagal ~1/3. Never EP if doing CC that day.\n3. TEE: Tuesdays only. Weekly rotation among Morant, Hammer, Lalonde, Huang, Cai, Cheng. Prefer on-call doctor.\n4. CC: one per weekday. Never on-call. Balance all incl Teitlebaum+Lubelsky. Respect vacation.\n5. NI: one per weekday. Not on call/CC/EP. Balance FT+Teitlebaum. Respect vacation.\n6. Weekends/stats: call1 only (no call2/CC/NI/EP/TEE).\n7. Teitlebaum: ~50% FT call. Max 1 weekend.\n8. Lubelsky: CC only ~3-4 days/month.\n9. YEAR-END BALANCE: This schedule must compensate for the prior period imbalances listed above. Doctors who were OVER-assigned get fewer shifts; doctors who were UNDER-assigned get more. Year-end totals across both periods should be equal for all FT MDs.\n\nFORMAT: JSON keys=YYYY-MM-DD, values={call1,call2?,CC:[],NI?,EP?,TEE?}\nSurnames: Bajaj,Morant,Hammer,Siu,Huang,Lalonde,Cai,Cheng,Rose,Myron,Kagal,Teitlebaum,Lubelsky\nReturn ONLY raw JSON.";
+  genLog.push("Sending to Claude via proxy...");
+  fetch(cfg.proxyUrl,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-opus-4-5",max_tokens:16000,messages:[{role:"user",content:prompt}]})})
+  .then(function(res){if(!res.ok)return res.text().then(function(t){throw new Error("Proxy "+res.status+": "+t.slice(0,150));});return res.json();})
+  .then(function(data){
+    genLog.push("Response received. Parsing...");
+    var text=(data&&data.content&&data.content[0]&&data.content[0].text)||"";
+    if(!text)throw new Error("Empty response");
+    var cleaned=text.replace(/^```[a-z]*\n?/,"").replace(/\n?```$/,"").trim();
+    var parsed;try{parsed=JSON.parse(cleaned);}catch(e){var m=cleaned.match(/\{[\s\S]+\}/);if(m)parsed=JSON.parse(m[0]);else throw new Error("Could not parse JSON from response");}
+    var dc=Object.keys(parsed).length;if(dc<100)throw new Error("Only "+dc+" days — response may be truncated");
+    genLog.push("\u2713 "+dc+" days generated successfully");
+    genPreview=parsed;genStatus="done";render();
+  })
+  .catch(function(e){genLog.push("\u2717 "+e.message);genStatus="error";render();});
+}
+
+// ── SWAP MODAL ────────────────────────────────────────────────────────────────
+function swapModalEl(){
+  var date=swapM.date,role=swapM.role,rc=RC[role],td=today();
+  var bg=el("div",{cls:"mdbg"});var box=el("div",{cls:"mdbx"});
+  bg.onclick=function(e){if(e.target===bg){swapM=null;render();}};
+  box.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><h3 style="font-size:15px;font-weight:800">&#8644; Request Swap</h3><button id="smc" style="background:none;border:none;cursor:pointer;font-size:20px;color:#94a3b8">&times;</button></div><div style="background:#f0f9ff;border-radius:8px;padding:9px 12px;margin-bottom:12px;border-left:3px solid '+rc.c+'"><div style="font-size:9px;color:#64748b;font-weight:700;margin-bottom:2px">YOUR SHIFT</div><div style="font-size:13px;font-weight:700"><span style="background:'+rc.c+';color:white;padding:1px 8px;border-radius:4px;font-size:9px;margin-right:7px">'+rc.l+'</span>'+fmt(date)+'</div></div>';
+  box.querySelector("#smc").onclick=function(){swapM=null;render();};
+  var elig=new Set();Object.entries(S).forEach(function(e){var d=e[0],day=e[1];if(d<td)return;["call1","call2","NI","EP","TEE"].forEach(function(r){if(day[r]&&day[r]!==user&&compat(role,r))elig.add(day[r]);});if(role==="CC")(day.CC||[]).forEach(function(n){if(n!==user)elig.add(n);});});
+  box.appendChild(el("label",{css:"display:block;font-size:10px;font-weight:700;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px"},"Swap With"));
+  var drSel=el("select",{cls:"inp",css:"margin-bottom:10px"});drSel.innerHTML='<option value="">Select a doctor&hellip;</option>'+Array.from(elig).sort().map(function(dr){return'<option value="'+dr+'">Dr. '+dr+'</option>';}).join("");box.appendChild(drSel);
+  box.appendChild(el("label",{css:"display:block;font-size:10px;font-weight:700;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px"},"Their Shift You Receive"));
+  var shSel=el("select",{cls:"inp",css:"margin-bottom:10px;display:none"});box.appendChild(shSel);
+  box.appendChild(el("label",{css:"display:block;font-size:10px;font-weight:700;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px"},"Message (optional)"));
+  var msgInp=el("textarea",{cls:"inp",css:"height:52px;resize:vertical;margin-bottom:10px"});msgInp.placeholder="Out of town, conference, etc.";box.appendChild(msgInp);
+  var sumDiv=el("div",{css:"margin-bottom:10px"});box.appendChild(sumDiv);
+  var sendBtn=el("button",{cls:"btn btn-gray"},null);sendBtn.textContent="Send Request to \u2026";box.appendChild(sendBtn);
+  drSel.onchange=function(){
+    var tn=drSel.value;shSel.innerHTML='<option value="">Select their shift&hellip;</option>';
+    if(!tn){shSel.style.display="none";sumDiv.innerHTML="";sendBtn.className="btn btn-gray";sendBtn.textContent="Send Request to \u2026";return;}
+    var ts=[];Object.entries(S).filter(function(e){return e[0]>=td&&e[0]!==date;}).sort(function(a,b){return a[0].localeCompare(b[0]);}).forEach(function(e){var d=e[0],day=e[1];["call1","call2","NI","EP","TEE"].forEach(function(r){if(day[r]===tn&&compat(role,r))ts.push({d:d,r:r});});if(role==="CC"&&(day.CC||[]).indexOf(tn)>=0)ts.push({d:d,r:"CC"});});
+    ts.slice(0,60).forEach(function(s){var o=el("option",{value:s.d+"|"+s.r},(RC[s.r]?RC[s.r].l:s.r)+" \u2014 "+fmt(s.d)+(isSt(s.d)?" &#127464;&#127462;":""));shSel.appendChild(o);});
+    shSel.style.display="block";sumDiv.innerHTML="";sendBtn.className="btn btn-gray";sendBtn.textContent="Send Request to Dr. "+tn;
+  };
+  shSel.onchange=function(){
+    var v=shSel.value;if(!v){sumDiv.innerHTML="";return;}
+    var parts=v.split("|"),tD=parts[0],tR=parts[1],tn=drSel.value;
+    sumDiv.innerHTML='<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 12px;font-size:11px;color:#166534;line-height:1.9"><strong>Summary</strong><br>Give Dr. '+tn+': '+(RC[role]?RC[role].l:role)+' &middot; '+fmt(date)+'<br>Receive: '+(RC[tR]?RC[tR].l:tR)+' &middot; '+fmt(tD)+'<br><span style="font-size:10px">&#10003; Auto-updates when Dr. '+tn+' approves</span></div>';
+    sendBtn.className="btn btn-blue";
+  };
+  sendBtn.onclick=function(){
+    var tn=drSel.value,sv=shSel.value;if(!tn||!sv||sendBtn.className.indexOf("btn-gray")>=0)return;
+    var parts=sv.split("|"),tD=parts[0],tR=parts[1];
+    swaps.push({id:Date.now()+"",req:user,reqD:date,reqR:role,tgt:tn,tgtD:tD,tgtR:tR,msg:msgInp.value,status:"pending"});
+    saveSwaps();swapM=null;curTab="swaps";toast("Swap request sent to Dr. "+tn);render();
+  };
+  bg.appendChild(box);return bg;
+}
+
+// ── VAC MODAL ─────────────────────────────────────────────────────────────────
+function vacModalEl(){
+  var bg=el("div",{cls:"mdbg"});var box=el("div",{cls:"mdbx"});
+  bg.onclick=function(e){if(e.target===bg){vacM=false;render();}};
+  var rem=cfg.maxVacDays-myVacDays();
+  box.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px"><h3 style="font-size:15px;font-weight:800">&#127796; Submit Vacation</h3><button id="vmc" style="background:none;border:none;cursor:pointer;font-size:20px;color:#94a3b8">&times;</button></div><div class="banner blue" style="font-size:11px"><strong>'+cfg.schedulePeriodLabel+'</strong> &middot; '+rem+' of '+cfg.maxVacDays+' days remaining &middot; <strong>Submissions are final</strong></div>';
+  box.querySelector("#vmc").onclick=function(){vacM=false;render();};
+  // Mode toggle
+  var modeDiv=el("div",{css:"display:flex;gap:4px;margin:12px 0;background:#f1f5f9;border-radius:8px;padding:3px"});
+  var mRange=el("button",{css:"flex:1;padding:7px 0;font-size:11px;font-weight:700;border:none;border-radius:7px;cursor:pointer;background:white;color:#1e40af"},"Date Range");
+  var mIndiv=el("button",{css:"flex:1;padding:7px 0;font-size:11px;font-weight:700;border:none;border-radius:7px;cursor:pointer;background:transparent;color:#64748b"},"Individual Days");
+  var mode="range";
+  mRange.onclick=function(){mode="range";mRange.style.background="white";mRange.style.color="#1e40af";mIndiv.style.background="transparent";mIndiv.style.color="#64748b";rangeDiv.style.display="";indivDiv.style.display="none";upd();};
+  mIndiv.onclick=function(){mode="indiv";mIndiv.style.background="white";mIndiv.style.color="#1e40af";mRange.style.background="transparent";mRange.style.color="#64748b";indivDiv.style.display="";rangeDiv.style.display="none";upd();};
+  modeDiv.appendChild(mRange);modeDiv.appendChild(mIndiv);box.appendChild(modeDiv);
+  // Range inputs
+  var rangeDiv=el("div",{});
+  var dGrid=el("div",{css:"display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px"});
+  var sLabel=el("div",{});sLabel.innerHTML='<label style="display:block;font-size:10px;font-weight:700;margin-bottom:4px;text-transform:uppercase">Start</label>';
+  var startInp=el("input",{type:"date",cls:"inp"});startInp.min=cfg.scheduleStart;startInp.max=cfg.scheduleEnd;sLabel.appendChild(startInp);
+  var eLabel=el("div",{});eLabel.innerHTML='<label style="display:block;font-size:10px;font-weight:700;margin-bottom:4px;text-transform:uppercase">End</label>';
+  var endInp=el("input",{type:"date",cls:"inp"});endInp.min=cfg.scheduleStart;endInp.max=cfg.scheduleEnd;eLabel.appendChild(endInp);
+  dGrid.appendChild(sLabel);dGrid.appendChild(eLabel);rangeDiv.appendChild(dGrid);box.appendChild(rangeDiv);
+  // Individual days
+  var indivDiv=el("div",{css:"display:none;margin-bottom:8px"});
+  var indivDates=[];
+  var addRow=el("div",{css:"display:flex;gap:6px;margin-bottom:6px"});
+  var addInp=el("input",{type:"date",cls:"inp",css:"flex:1"});addInp.min=cfg.scheduleStart;addInp.max=cfg.scheduleEnd;
+  var addBtn=el("button",{css:"background:#1e40af;color:white;border:none;border-radius:8px;padding:0 14px;font-size:14px;font-weight:700;cursor:pointer;flex-shrink:0"},"+");
+  var tagsDiv=el("div",{css:"display:flex;flex-wrap:wrap;gap:4px;margin-top:4px"});
+  function refreshTags(){tagsDiv.innerHTML="";indivDates.forEach(function(d){var tag=el("div",{css:"background:#dbeafe;color:#1e40af;border-radius:20px;padding:3px 10px;font-size:10px;font-weight:600;display:flex;align-items:center;gap:3px"},fmts(d));var x=el("button",{css:"background:none;border:none;cursor:pointer;color:#1e40af;font-size:13px;padding:0;line-height:1"},"\u00d7");x.onclick=(function(date){return function(){indivDates=indivDates.filter(function(v){return v!==date;});refreshTags();upd();};})(d);tag.appendChild(x);tagsDiv.appendChild(tag);});}
+  addBtn.onclick=function(){var v=addInp.value;if(v&&indivDates.indexOf(v)<0){indivDates.push(v);indivDates.sort();addInp.value="";refreshTags();upd();}};
+  addRow.appendChild(addInp);addRow.appendChild(addBtn);indivDiv.appendChild(addRow);indivDiv.appendChild(tagsDiv);box.appendChild(indivDiv);
+  // Reason
+  box.appendChild(el("label",{css:"display:block;font-size:10px;font-weight:700;margin-bottom:4px;margin-top:8px;text-transform:uppercase"},"Reason (optional)"));
+  var reasonInp=el("textarea",{cls:"inp",css:"height:48px;resize:vertical;margin-bottom:8px"});reasonInp.placeholder="Conference, family trip, etc.";box.appendChild(reasonInp);
+  var sumDiv=el("div",{css:"margin-bottom:8px"});box.appendChild(sumDiv);
+  var subBtn=el("button",{cls:"btn btn-gray"},"Submit Vacation Dates");
+  var selDates=[];
+  function upd(){
+    if(mode==="range"){var s=startInp.value,e=endInp.value;if(!s||!e||s>e){sumDiv.innerHTML="";subBtn.className="btn btn-gray";return;}selDates=[];var cur=new Date(s+"T12:00:00"),end=new Date(e+"T12:00:00");while(cur<=end){selDates.push(cur.toISOString().split("T")[0]);cur.setDate(cur.getDate()+1);}}
+    else{selDates=indivDates.slice();}
+    var ok=selDates.length>0&&selDates.length<=rem;
+    sumDiv.innerHTML='<div style="border-radius:8px;padding:9px 12px;border:1px solid '+(ok?"#bbf7d0":selDates.length>rem?"#fecaca":"#e2e8f0")+';background:'+(ok?"#f0fdf4":selDates.length>rem?"#fef2f2":"#f8fafc")+';font-size:11px;color:'+(ok?"#166534":selDates.length>rem?"#dc2626":"#94a3b8")+';font-weight:600">'+selDates.length+' day'+(selDates.length!==1?"s":"")+(selDates.length>rem?" \u2014 exceeds "+rem+" remaining":selDates.length>0?" selected":"")+'</div>';
+    subBtn.className="btn "+(ok?"btn-blue":"btn-gray");
+  }
+  startInp.onchange=upd;endInp.onchange=upd;
+  subBtn.onclick=function(){if(!selDates.length||selDates.length>rem)return;vacs.push({id:Date.now()+"",name:user,dates:selDates,reason:reasonInp.value});saveVacs();vacM=false;toast("Vacation submitted \u2713");render();};
+  box.appendChild(subBtn);bg.appendChild(box);return bg;
+}
+
+// ── ICS + PRINT ───────────────────────────────────────────────────────────────
+function downloadFullICS(){
+  var ics="BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//NYGH Cardiology//Portal 2026//EN\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\nX-WR-CALNAME:NYGH Cardiology Full Schedule 2026\r\n";
+  var ts=new Date().toISOString().replace(/[-:.]/g,"").slice(0,15)+"Z";
+  Object.entries(S).sort(function(a,b){return a[0].localeCompare(b[0]);}).forEach(function(e){
+    var ds=e[0],day=e[1],icsDate=ds.replace(/-/g,"");
+    var nd=new Date(ds+"T12:00:00");nd.setDate(nd.getDate()+1);var ni=nd.toISOString().split("T")[0].replace(/-/g,"");
+    var rows=[];["call1","call2","NI","EP","TEE"].forEach(function(r){if(day[r])rows.push({role:r,name:day[r]});});(day.CC||[]).forEach(function(n){rows.push({role:"CC",name:n});});
+    rows.forEach(function(row){ics+="BEGIN:VEVENT\r\nUID:nygh-"+ds+"-"+row.role+"-"+row.name+"@nygh.on.ca\r\nDTSTAMP:"+ts+"\r\nDTSTART;VALUE=DATE:"+icsDate+"\r\nDTEND;VALUE=DATE:"+ni+"\r\nSUMMARY:"+(RC[row.role]?RC[row.role].l:row.role)+": Dr. "+row.name+(STATS[ds]?" ("+STATS[ds]+")+":"")+"\r\nLOCATION:North York General Hospital\r\nSTATUS:CONFIRMED\r\nEND:VEVENT\r\n";});
+  });
+  ics+="END:VCALENDAR";
+  var blob=new Blob([ics],{type:"text/calendar;charset=utf-8"});var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="NYGH_Cardiology_Full_2026.ics";document.body.appendChild(a);a.click();document.body.removeChild(a);
+}
+
+function downloadMyICS(){
+  var ics="BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//NYGH Cardiology//Portal 2026//EN\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\nX-WR-CALNAME:NYGH Cardiology - Dr. "+user+"\r\n";
+  var ts=new Date().toISOString().replace(/[-:.]/g,"").slice(0,15)+"Z";
+  Object.entries(S).sort(function(a,b){return a[0].localeCompare(b[0]);}).forEach(function(e){
+    var ds=e[0],day=e[1],icsDate=ds.replace(/-/g,"");
+    var nd=new Date(ds+"T12:00:00");nd.setDate(nd.getDate()+1);var ni=nd.toISOString().split("T")[0].replace(/-/g,"");
+    var roles=[];["call1","call2","NI","EP","TEE"].forEach(function(r){if(day[r]===user)roles.push(r);});if((day.CC||[]).indexOf(user)>=0)roles.push("CC");
+    roles.forEach(function(role){ics+="BEGIN:VEVENT\r\nUID:nygh-"+ds+"-"+role+"-"+user+"@nygh.on.ca\r\nDTSTAMP:"+ts+"\r\nDTSTART;VALUE=DATE:"+icsDate+"\r\nDTEND;VALUE=DATE:"+ni+"\r\nSUMMARY:[NYGH] "+(RC[role]?RC[role].l:role)+" - Dr. "+user+(STATS[ds]?" ("+STATS[ds]+")":"")+"\r\nLOCATION:North York General Hospital\r\nSTATUS:CONFIRMED\r\nEND:VEVENT\r\n";});
+  });
+  ics+="END:VCALENDAR";
+  var blob=new Blob([ics],{type:"text/calendar;charset=utf-8"});var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="NYGH_"+user+"_2026.ics";document.body.appendChild(a);a.click();document.body.removeChild(a);
+}
+
+function openPrintSchedule(){
+  var Y=2026,MNS=["January","February","March","April","May","June"];
+  var h="<!DOCTYPE html><html><head><meta charset='UTF-8'><title>NYGH Cardiology Schedule 2026</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:system-ui,sans-serif;background:#fff}.month-page{width:100%;padding:12px;page-break-after:always}.month-page:last-child{page-break-after:auto}h2{font-size:17px;font-weight:800;color:#0d1b2a;margin-bottom:8px;border-bottom:3px solid #2563eb;padding-bottom:5px}.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}.dh{text-align:center;font-size:9px;font-weight:800;color:#64748b;padding:3px 0;background:#f8fafc}.cell{border:1px solid #e2e8f0;border-radius:4px;padding:3px;min-height:88px;overflow:hidden}.cell.wk{background:#f9fafb;min-height:40px}.cell.st{background:#fff5f5;border-color:#fca5a5}.dn{font-size:9px;font-weight:800;color:#64748b;margin-bottom:2px}.pill{display:flex;align-items:center;gap:2px;padding:1px 2px;margin-bottom:1px}.pl{font-size:6px;font-weight:800;min-width:9px;flex-shrink:0}.pn{font-size:6.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;color:#374151}.leg{display:flex;flex-wrap:wrap;gap:8px;margin-top:7px;border-top:1px solid #e2e8f0;padding-top:5px;font-size:9px;color:#64748b}.li{display:flex;align-items:center;gap:3px}.ls{width:9px;height:9px;border-radius:2px}.no-print{}.@media print{@page{size:landscape;margin:0.4in}body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.no-print{display:none!important}}</style></head><body>";
+  h+="<div class='no-print' style='position:sticky;top:0;background:#0d1b2a;padding:10px 16px;display:flex;align-items:center;justify-content:space-between'><span style='color:white;font-weight:800;font-size:14px'>NYGH Cardiology Schedule 2026</span><button onclick='window.print()' style='background:#2563eb;color:white;border:none;padding:8px 18px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer'>&#128424; Print All (Landscape)</button></div>";
+  for(var m=0;m<6;m++){
+    var fd=new Date(Y,m,1).getDay(),dim=new Date(Y,m+1,0).getDate(),blanks=fd===0?6:fd-1;
+    h+="<div class='month-page'><h2>"+MNS[m]+" "+Y+"</h2><div class='grid'>";
+    ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].forEach(function(d){h+="<div class='dh'>"+d+"</div>";});
+    for(var i=0;i<blanks;i++)h+="<div></div>";
+    for(var d=1;d<=dim;d++){
+      var ds=Y+"-"+String(m+1).padStart(2,"0")+"-"+String(d).padStart(2,"0");
+      var day=S[ds]||{},wk=isW(ds),st=isSt(ds);
+      h+="<div class='cell"+(wk?" wk":"")+(st?" st":"")+"'><div class='dn'>"+d+(st?" &#127464;&#127462;":"")+"</div>";
+      function ap(role,name,col){return "<div class='pill'><span class='pl' style='color:"+col+"'>"+RC[role].s+"</span><span class='pn'>"+name+"</span></div>";}
+      if(wk||st){if(day.call1)h+=ap("call1",day.call1,"#1e3a8a");if(day.call2)h+=ap("call2",day.call2,"#2563eb");}
+      else{if(day.call1)h+=ap("call1",day.call1,"#1e3a8a");if(day.call2)h+=ap("call2",day.call2,"#2563eb");(day.CC||[]).forEach(function(n){h+=ap("CC",n,"#0d9488");});if(day.NI)h+=ap("NI",day.NI,"#b45309");if(day.EP)h+=ap("EP",day.EP,"#6d28d9");if(day.TEE)h+=ap("TEE",day.TEE,"#9f1239");}
+      h+="</div>";
+    }
+    h+="</div><div class='leg'>";
+    [{r:"call1",c:"#1e3a8a"},{r:"call2",c:"#2563eb"},{r:"CC",c:"#0d9488"},{r:"NI",c:"#b45309"},{r:"EP",c:"#6d28d9"},{r:"TEE",c:"#9f1239"}].forEach(function(x){h+="<div class='li'><div class='ls' style='background:"+x.c+"'></div><strong>"+RC[x.r].s+"</strong> "+RC[x.r].l+"</div>";});
+    h+="</div></div>";
+  }
+  h+="</body></html>";
+  var w=window.open("","_blank");if(w){w.document.write(h);w.document.close();}
+}
+
+// ── BOOT ──────────────────────────────────────────────────────────────────────
+document.getElementById("nav").addEventListener("click",function(e){var tb=e.target.closest(".tb");if(!tb)return;curTab=tb.dataset.tab;swapM=null;vacM=false;render();});
+document.getElementById("signout").onclick=function(){user=null;isAdmin=false;curTab="cal";swapM=null;vacM=false;loadAll().then(function(){render();});};
+document.getElementById("icsBtn").onclick=function(){if(user)downloadMyICS();};
+loadAll().then(function(){render();});
+</script>
+</body>
+</html>
